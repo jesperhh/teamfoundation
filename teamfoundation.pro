@@ -2,11 +2,23 @@ DEFINES += TEAMFOUNDATION_LIBRARY
 
 # TeamFoundation files
 
-SOURCES += teamfoundationplugin.cpp
+SOURCES += \
+        teamfoundationplugin.cpp \
+        teamfoundationcontrol.cpp \
+        teamfoundationsettings.cpp \
+        settingspage.cpp \
+    teamfoundationclient.cpp
 
-HEADERS += teamfoundationplugin.h \
+HEADERS += \
+        teamfoundationplugin.h \
         teamfoundation_global.h \
-        teamfoundationconstants.h
+        teamfoundationconstants.h \
+        teamfoundationcontrol.h \
+        teamfoundationsettings.h \
+        settingspage.h \
+    teamfoundationclient.h
+
+FORMS += settingspage.ui
 
 # Qt Creator linking
 
@@ -26,7 +38,7 @@ isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=C:/Qt/CreatorFromSource/build-qtcreator-D
 ##    "~/Library/Application Support/QtProject/Qt Creator" on Mac
 # USE_USER_DESTDIR = yes
 
-PROVIDER = OktetNET
+PROVIDER = TeamFoundation
 
 ###### If the plugin can be depended upon by other plugins, this code needs to be outsourced to
 ###### <dirname>_dependencies.pri, where <dirname> is the name of the directory containing the

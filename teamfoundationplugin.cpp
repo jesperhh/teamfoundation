@@ -1,21 +1,32 @@
 #include "teamfoundationplugin.h"
 #include "teamfoundationconstants.h"
 
+#include "teamfoundationcontrol.h"
+#include "teamfoundationclient.h"
+#include "settingspage.h"
+
 #include <coreplugin/icore.h>
 #include <coreplugin/icontext.h>
 #include <coreplugin/actionmanager/actionmanager.h>
-#include <coreplugin/actionmanager/command.h>
 #include <coreplugin/actionmanager/actioncontainer.h>
+#include <coreplugin/actionmanager/command.h>
 #include <coreplugin/coreconstants.h>
+
+#include <locator/commandlocator.h>
 
 #include <QAction>
 #include <QMessageBox>
 #include <QMainWindow>
 #include <QMenu>
 
+#include <utils/qtcassert.h>
+#include <utils/parameteraction.h>
+
 #include <QtPlugin>
 
 using namespace TeamFoundation::Internal;
+
+TeamFoundationPlugin *TeamFoundationPlugin::m_teamFoundationPluginInstance = 0;
 
 TeamFoundationPlugin::TeamFoundationPlugin()
 {
@@ -28,30 +39,101 @@ TeamFoundationPlugin::~TeamFoundationPlugin()
     // Delete members
 }
 
+Core::Command* TeamFoundationPlugin::createFileCommand(const Core::Context &context, Core::ActionContainer* container,
+                                             const QString &emptyText, const QString &parameterText, const char *actionId)
+{
+    Utils::ParameterAction *action = new Utils::ParameterAction(
+                emptyText, parameterText, Utils::ParameterAction::EnabledWithParameter, this);
+
+    Core::Command *command = Core::ActionManager::registerAction(action, Core::Id(actionId), context);
+    command->setAttribute(Core::Command::CA_UpdateText);
+    container->addAction(command);
+    m_commandLocator->appendCommand(command);
+    m_fileActionList.append(action);
+    return command;
+}
+
+void TeamFoundationPlugin::createMenus()
+{
+    Core::Context context(Core::Constants::C_GLOBAL);
+    Core::Command* command;
+
+    // Create menu item for Team Foundation
+    Core::ActionContainer* container = Core::ActionManager::createMenu(Core::Id(Constants::MENU_ID));
+
+    const QString prefix = QLatin1String("tfs");
+    m_commandLocator = new Locator::CommandLocator("Team Foundation", prefix, prefix);
+    addAutoReleasedObject(m_commandLocator);
+
+
+    command = createFileCommand(context, container, tr("Add current File"), tr("Add \"%1\""), "TeamFoundation.Add");
+    connect(command->action(), SIGNAL(triggered()), m_teamFoundationClient, SLOT(addCurrentFile()));
+
+    command = createFileCommand(context, container, tr("Delete current File"), tr("Delete \"%1\""), "TeamFoundation.Delete");
+    connect(command->action(), SIGNAL(triggered()), m_teamFoundationClient, SLOT(deleteCurrentFile()));
+
+    command = createFileCommand(context, container, tr("Compare current File"), tr("Compare \"%1\""), "TeamFoundation.Compare");
+    connect(command->action(), SIGNAL(triggered()), m_teamFoundationClient, SLOT(compareCurrentFile()));
+
+    command = createFileCommand(context, container, tr("Undo current File"), tr("Undo \"%1\""), "TeamFoundation.Undo");
+    connect(command->action(), SIGNAL(triggered()), m_teamFoundationClient, SLOT(undoCurrentFile()));
+
+    command = createFileCommand(context, container, tr("Check In current File"), tr("Check In \"%1\""), "TeamFoundation.CheckIn");
+    connect(command->action(), SIGNAL(triggered()), m_teamFoundationClient, SLOT(checkInCurrentFile()));
+
+    command = createFileCommand(context, container, tr("Annotate current File"), tr("Annotate \"%1\""), "TeamFoundation.Annotate");
+    connect(command->action(), SIGNAL(triggered()), m_teamFoundationClient, SLOT(annotateCurrentFile()));
+
+    // Request the Tools menu and add the Bazaar menu to it
+    Core::ActionContainer *toolsMenu = Core::ActionManager::actionContainer(Core::Id(Core::Constants::M_TOOLS));
+    toolsMenu->addMenu(container);
+
+    QMenu *menu = container->menu();
+    menu->setTitle(tr("Team Foundation"));
+    m_menuAction = menu->menuAction();
+}
+
 bool TeamFoundationPlugin::initialize(const QStringList &arguments, QString *errorString)
 {
-    // Register objects in the plugin manager's object pool
-    // Load settings
-    // Add actions to menus
-    // Connect to other plugins' signals
-    // In the initialize function, a plugin can be sure that the plugins it
-    // depends on have initialized their members.
-
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)
 
-//    QAction *action = new QAction(tr("TeamFoundation action"), this);
-//    Core::Command *cmd = Core::ActionManager::registerAction(action, Constants::ACTION_ID,
-//                                                             Core::Context(Core::Constants::C_GLOBAL));
-//    cmd->setDefaultKeySequence(QKeySequence(tr("Ctrl+Alt+Meta+A")));
-//    connect(action, SIGNAL(triggered()), this, SLOT(triggerAction()));
+    initializeVcs(new TeamFoundationControl(this));
 
-    Core::ActionContainer *menu = Core::ActionManager::createMenu(Constants::MENU_ID);
-    menu->menu()->setTitle(tr("TeamFoundation"));
-//    menu->addAction(cmd);
-    Core::ActionManager::actionContainer(Core::Constants::M_TOOLS)->addMenu(menu);
+    m_teamFoundationPluginInstance = this;
+
+    m_settings.readSettings(Core::ICore::settings());
+
+    m_teamFoundationClient = new TeamFoundationClient(this);
+    addAutoReleasedObject(new SettingsPage);
+
+    createMenus();
 
     return true;
+}
+
+TeamFoundationPlugin *TeamFoundationPlugin::instance()
+{
+    QTC_ASSERT(m_teamFoundationPluginInstance, return m_teamFoundationPluginInstance);
+    return m_teamFoundationPluginInstance;
+}
+
+const TeamFoundationSettings &TeamFoundationPlugin::settings() const
+{
+    return this->m_settings;
+}
+
+void TeamFoundationPlugin::setSettings(const TeamFoundationSettings &s)
+{
+    if (s != m_settings) {
+        m_settings = s;
+        m_settings.writeSettings(Core::ICore::settings());
+    }
+}
+
+const TeamFoundationClient *TeamFoundationPlugin::client() const
+{
+    return this->m_teamFoundationClient;
 }
 
 bool TeamFoundationPlugin::submitEditorAboutToClose()
@@ -61,30 +143,21 @@ bool TeamFoundationPlugin::submitEditorAboutToClose()
 
 void TeamFoundationPlugin::updateActions(VcsBase::VcsBasePlugin::ActionState as)
 {
+    if (!enableMenuAction(as, m_menuAction))
+    {
+        m_commandLocator->setEnabled(false);
+        return;
+    }
 
+    const bool hasTopLevel = currentState().hasTopLevel();
+    m_commandLocator->setEnabled(hasTopLevel);
+
+    const QString currentFile = currentState().currentFileName();
+    for (Utils::ParameterAction *action: m_fileActionList)
+    {
+        action->setParameter(currentFile);
+    }
 }
-
-//void TeamFoundationPlugin::extensionsInitialized()
-//{
-//    // Retrieve objects from the plugin manager's object pool
-//    // In the extensionsInitialized function, a plugin can be sure that all
-//    // plugins that depend on it are completely initialized.
-//}
-
-//ExtensionSystem::IPlugin::ShutdownFlag TeamFoundationPlugin::aboutToShutdown()
-//{
-//    // Save settings
-//    // Disconnect from signals that are not needed during shutdown
-//    // Hide UI (if you add UI that is not in the main window directly)
-//    return SynchronousShutdown;
-//}
-
-//void TeamFoundationPlugin::triggerAction()
-//{
-//    QMessageBox::information(Core::ICore::mainWindow(),
-//                             tr("Action triggered"),
-//                             tr("This is an action from TeamFoundation."));
-//}
 
 Q_EXPORT_PLUGIN2(TeamFoundation, TeamFoundationPlugin)
 
