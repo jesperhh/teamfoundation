@@ -7,7 +7,9 @@ SOURCES += \
         teamfoundationcontrol.cpp \
         teamfoundationsettings.cpp \
         settingspage.cpp \
-    teamfoundationclient.cpp
+        teamfoundationclient.cpp \
+        checkoutwizard.cpp \
+        checkoutwizardpage.cpp
 
 HEADERS += \
         teamfoundationplugin.h \
@@ -16,9 +18,16 @@ HEADERS += \
         teamfoundationcontrol.h \
         teamfoundationsettings.h \
         settingspage.h \
-    teamfoundationclient.h
+        teamfoundationclient.h \
+        checkoutwizard.h \
+        checkoutwizardpage.h
+
 
 FORMS += settingspage.ui
+
+RESOURCES += teamfoundation.qrc
+
+OTHER_FILES += TeamFoundation.pluginspec.in
 
 # Qt Creator linking
 
@@ -28,7 +37,7 @@ isEmpty(QTCREATOR_SOURCES):QTCREATOR_SOURCES=C:/Qt/CreatorFromSource/qt-creator-
 
 ## set the QTC_BUILD environment variable to override the setting here
 IDE_BUILD_TREE = $$(QTC_BUILD)
-isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=C:/Qt/CreatorFromSource/build-qtcreator-Desktop_Qt_5_2_0_MSVC2012_OpenGL_64bit-Debug/
+isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=C:/Qt/CreatorFromSource/build-qtcreator-Desktop_Qt_5_2_0_MSVC2012_OpenGL_32bit-Release/
 
 ## uncomment to build plugin into user config directory
 ## <localappdata>/plugins/<ideversion>

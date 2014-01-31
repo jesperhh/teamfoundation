@@ -1,7 +1,7 @@
-<plugin name=\"TeamFoundation\" version=\"0.0.1\" compatVersion=\"0.0.1\">
-    <vendor>OktetNET</vendor>
-    <copyright>(C) Jesper Hellesø Hansen 2014</copyright>
-    <license></license>
+<plugin name=\"TeamFoundation\" version=\"0.1.0\" compatVersion=\"0.1.0\">
+    <vendor>Jesper Hellesø Hansen</vendor>
+    <copyright>(C) 2014 Jesper Hellesø Hansen</copyright>
+    <license>GNU Lesser General Public License 2.1</license>
     <description>Team Foundation Server plugin for Qt Creator</description>
     <url>http://www.oktet.net</url>
     $$dependencyList

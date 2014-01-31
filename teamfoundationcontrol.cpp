@@ -1,25 +1,30 @@
+/****************************************************************************
+**
+** Team Foundation Server plugin for Qt Creator
+** Copyright (C) 2014 Jesper Hellesø Hansen
+** 
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License as published by the Free Software Foundation; either
+** version 2.1 of the License, or (at your option) any later version.
+** 
+** This library is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+** Lesser General Public License for more details.
+** 
+** You should have received a copy of the GNU Lesser General Public
+** License along with this library; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+**
+****************************************************************************/
+
 #include "teamfoundationcontrol.h"
 #include "teamfoundationplugin.h"
-#include "teamfoundationsettings.h"
 #include "teamfoundationclient.h"
+#include "teamfoundationconstants.h"
 
-#include <vcsbase/vcsbaseconstants.h>
-#include <vcsbase/vcsbaseplugin.h>
-#include <utils/synchronousprocess.h>
-
-#include <QFileInfo>
-#include <QStringList>
-#include <QString>
-#include <qdir.h>
-
-#define RUN_PREAMBLE_1(file) \
-    const QFileInfo file##Info(file); \
-    QStringList parameters;
-
-#define RUN_PREAMBLE_2(file1, file2) \
-    const QFileInfo file1##Info(file1); \
-    const QFileInfo file2##Info(file2); \
-    QStringList parameters;
+#include <QDir>
 
 using namespace TeamFoundation;
 using namespace TeamFoundation::Internal;
@@ -36,7 +41,7 @@ QString TeamFoundationControl::displayName() const
 
 Core::Id TeamFoundationControl::id() const
 {
-    return Core::Id("T.TeamFoundation");
+    return Core::Id(TeamFoundation::Constants::VCS_ID_TEAMFOUNDATION);
 }
 
 bool TeamFoundationControl::isConfigured() const
@@ -59,12 +64,12 @@ bool TeamFoundationControl::supportsOperation(Operation operation) const
     case AddOperation:
     case DeleteOperation:
     case MoveOperation:
-    case CheckoutOperation:
     case GetRepositoryRootOperation:
+    case AnnotateOperation:
         break;
     case CreateRepositoryOperation:
     case SnapshotOperations:
-    case AnnotateOperation:
+    case CheckoutOperation:
         result = false;
         break;
     }
@@ -125,13 +130,12 @@ bool TeamFoundationControl::vcsCheckout(const QString &directory, const QByteArr
 {
     Q_UNUSED(directory)
     Q_UNUSED(url);
-    return true;
+    return false;
 }
 
 QString TeamFoundationControl::vcsGetRepositoryURL(const QString &directory)
 {
-    Q_UNUSED(directory)
-    return QLatin1String("");
+    return m_plugin->client()->repositoryUrl(directory);
 }
 
 bool TeamFoundationControl::vcsCreateRepository(const QString &directory )
@@ -142,7 +146,21 @@ bool TeamFoundationControl::vcsCreateRepository(const QString &directory )
 
 bool TeamFoundationControl::vcsAnnotate(const QString &file, int line)
 {
-    Q_UNUSED(file)
     Q_UNUSED(line)
-    return true;
+    return m_plugin->client()->annotateFile(file);
+}
+
+void TeamFoundationControl::emitFilesChanged(const QStringList & files)
+{
+    emit filesChanged(files);
+}
+
+void TeamFoundationControl::emitRepositoryChanged(const QString & repository)
+{
+    emit repositoryChanged(repository);
+}
+
+void TeamFoundationControl::emitConfigurationChanged()
+{
+    emit configurationChanged();
 }

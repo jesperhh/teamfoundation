@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/teamfoundation">
+        <file>images/teamfoundation.png</file>
+    </qresource>
+</RCC>

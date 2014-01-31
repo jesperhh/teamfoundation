@@ -1,10 +1,31 @@
-#include "teamfoundationclient.h"
+/****************************************************************************
+**
+** Team Foundation Server plugin for Qt Creator
+** Copyright (C) 2014 Jesper Hellesø Hansen
+** 
+** This library is free software; you can redistribute it and/or
+** modify it under the terms of the GNU Lesser General Public
+** License as published by the Free Software Foundation; either
+** version 2.1 of the License, or (at your option) any later version.
+** 
+** This library is distributed in the hope that it will be useful,
+** but WITHOUT ANY WARRANTY; without even the implied warranty of
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+** Lesser General Public License for more details.
+** 
+** You should have received a copy of the GNU Lesser General Public
+** License along with this library; if not, write to the Free Software
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+**
+****************************************************************************/
 
+#include "teamfoundationclient.h"
 #include "teamfoundationplugin.h"
 
 #include <coreplugin/iversioncontrol.h>
 #include <utils/synchronousprocess.h>
 #include <QFileInfo>
+#include <utils/qtcassert.h>
 
 #define RUN_PREAMBLE_1(file) \
     const QFileInfo file##Info(file); \
@@ -16,6 +37,11 @@
     QStringList parameters;
 
 using namespace TeamFoundation::Internal;
+using namespace VcsBase;
+const int SuppressCompletely =
+        VcsBasePlugin::SuppressStdErrInLogWindow |
+        VcsBasePlugin::SuppressFailMessageInLogWindow |
+        VcsBasePlugin::SuppressCommandLogging;
 
 TeamFoundationClient::TeamFoundationClient(TeamFoundationPlugin *plugin) : QObject(plugin),
     m_plugin(plugin)
@@ -50,39 +76,53 @@ bool TeamFoundationClient::moveFile(const QString &from, const QString &to) cons
     parameters << fromInfo.absoluteFilePath();
     parameters << toInfo.absoluteFilePath();
 
-    const TeamFoundationResponse resp = runTf(fromInfo.absolutePath(), parameters);
+    const TeamFoundationResponse resp = runTf(fromInfo.absolutePath(), parameters,
+            VcsBasePlugin::ShowStdOutInLogWindow | VcsBasePlugin::FullySynchronously);
     return !resp.error;
 }
 
-bool TeamFoundationClient::compareFile(const QString &fileName)
+bool TeamFoundationClient::compare(const QString &fileName)
 {
     RUN_PREAMBLE_1(fileName)
 
     parameters << QLatin1String("difference");
     parameters << fileName;
     parameters << QLatin1String("/format:Visual");
+    parameters << QLatin1String("/prompt");
+
+    addRecursive(parameters, fileName);
 
     const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters);
     return !resp.error;
 }
 
-bool TeamFoundationClient::undoFile(const QString &fileName)
+bool TeamFoundationClient::undo(const QString &fileName)
 {
     RUN_PREAMBLE_1(fileName)
 
     parameters << QLatin1String("undo");
     parameters << fileName;
 
-    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters);
+    addRecursive(parameters, fileName);
+
+    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters,
+        VcsBasePlugin::ShowStdOutInLogWindow | VcsBasePlugin::FullySynchronously);
+    if (!resp.error)
+    {
+        m_plugin->emitChangedSignal(fileName);
+    }
     return !resp.error;
 }
 
-bool TeamFoundationClient::checkInFile(const QString &fileName)
+bool TeamFoundationClient::checkIn(const QString &fileName)
 {
     RUN_PREAMBLE_1(fileName)
 
     parameters << QLatin1String("checkin");
     parameters << fileName;
+    parameters << QLatin1String("/prompt");
+
+    addRecursive(parameters, fileName);
 
     const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters);
     return !resp.error;
@@ -108,7 +148,38 @@ bool TeamFoundationClient::annotateFile(const QString &fileName) const
 
     const TeamFoundationResponse resp = runTfpt(fileNameInfo.absolutePath(), parameters);
     return !resp.error;
-    return true;
+}
+
+bool TeamFoundationClient::getLatest(const QString &fileName) const
+{
+    RUN_PREAMBLE_1(fileName)
+
+    parameters << QLatin1String("get");
+    parameters << fileName;
+    parameters << QLatin1String("/prompt");
+
+    addRecursive(parameters, fileName);
+
+    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters);
+    if (!resp.error)
+    {
+        m_plugin->emitChangedSignal(fileName);
+    }
+    return !resp.error;
+}
+
+bool TeamFoundationClient::history(const QString &fileName) const
+{
+    RUN_PREAMBLE_1(fileName)
+
+    parameters << QLatin1String("history");
+    parameters << fileName;
+    parameters << QLatin1String("/prompt");
+
+    addRecursive(parameters, fileName);
+
+    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters);
+    return !resp.error;
 }
 
 bool TeamFoundationClient::managesFile(const QString &fileName) const
@@ -118,9 +189,9 @@ bool TeamFoundationClient::managesFile(const QString &fileName) const
     parameters << QLatin1String("info");
     parameters << fileName;
 
-    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters, 0);
+    using namespace VcsBase;
+    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters, SuppressCompletely);
     return !resp.error;
-    return true;
 }
 
 bool TeamFoundationClient::managesDirectory(const QString &directory) const
@@ -129,45 +200,125 @@ bool TeamFoundationClient::managesDirectory(const QString &directory) const
     parameters << QLatin1String("info");
     parameters << directory;
 
-    const TeamFoundationResponse resp = runTf(directory, parameters , 0);
+    const TeamFoundationResponse resp = runTf(directory, parameters, SuppressCompletely);
     return !resp.error;
-    return true;
+}
+
+QString TeamFoundationClient::repositoryUrl(const QString &fileName) const
+{
+    RUN_PREAMBLE_1(fileName)
+    parameters << QLatin1String("info");
+    parameters << fileName;
+
+    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters, SuppressCompletely);
+    if (resp.error || resp.standardOut.isNull() || resp.standardOut.isEmpty())
+        return QString();
+
+    return getRepositoryUrl(resp.standardOut);
+}
+
+QString TeamFoundationClient::getRepositoryUrl(const QString &workspaceInfo)
+{
+    QString result;
+    QRegExp r(QLatin1String("Server path\\s*:\\s*([^\\s]*)\n"));
+    r.setMinimal(true); // lame regexp suppport!
+    QTC_ASSERT(r.isValid(), return result);
+    if (r.indexIn(workspaceInfo) != -1)
+    {
+        result = r.cap(1);
+    }
+    return result;
 }
 
 void TeamFoundationClient::addCurrentFile()
 {
+    QTC_ASSERT(m_plugin->currentState().hasFile(), return);
     const QString filename = m_plugin->currentState().currentFile();
     addFile(filename);
 }
 
 void TeamFoundationClient::deleteCurrentFile()
 {
+    QTC_ASSERT(m_plugin->currentState().hasFile(), return);
     const QString filename = m_plugin->currentState().currentFile();
     deleteFile(filename);
 }
 
 void TeamFoundationClient::compareCurrentFile()
 {
+    QTC_ASSERT(m_plugin->currentState().hasFile(), return);
     const QString filename = m_plugin->currentState().currentFile();
-    compareFile(filename);
+    compare(filename);
 }
 
 void TeamFoundationClient::undoCurrentFile()
 {
+    QTC_ASSERT(m_plugin->currentState().hasFile(), return);
     const QString filename = m_plugin->currentState().currentFile();
-    undoFile(filename);
+    undo(filename);
 }
 
 void TeamFoundationClient::checkInCurrentFile()
 {
+    QTC_ASSERT(m_plugin->currentState().hasFile(), return);
     const QString filename = m_plugin->currentState().currentFile();
-    checkInFile(filename);
+    checkIn(filename);
 }
 
 void TeamFoundationClient::annotateCurrentFile()
 {
+    QTC_ASSERT(m_plugin->currentState().hasFile(), return);
     const QString filename = m_plugin->currentState().currentFile();
     annotateFile(filename);
+}
+
+void TeamFoundationClient::getLatestCurrentFile()
+{
+    QTC_ASSERT(m_plugin->currentState().hasFile(), return);
+    const QString filename = m_plugin->currentState().currentFile();
+    getLatest(filename);
+}
+
+void TeamFoundationClient::historyCurrentFile()
+{
+    QTC_ASSERT(m_plugin->currentState().hasFile(), return);
+    const QString filename = m_plugin->currentState().currentFile();
+    history(filename);
+}
+
+void TeamFoundationClient::historyProject()
+{
+    QTC_ASSERT(m_plugin->currentState().hasTopLevel(), return);
+    const QString topLevel = m_plugin->currentState().topLevel();
+    history(topLevel);
+}
+
+void TeamFoundationClient::getLatestProject()
+{
+    QTC_ASSERT(m_plugin->currentState().hasTopLevel(), return);
+    const QString topLevel = m_plugin->currentState().topLevel();
+    getLatest(topLevel);
+}
+
+void TeamFoundationClient::undoProject()
+{
+    QTC_ASSERT(m_plugin->currentState().hasTopLevel(), return);
+    const QString topLevel = m_plugin->currentState().topLevel();
+    undo(topLevel);
+}
+
+void TeamFoundationClient::compareProject()
+{
+    QTC_ASSERT(m_plugin->currentState().hasTopLevel(), return);
+    const QString topLevel = m_plugin->currentState().topLevel();
+    compare(topLevel);
+}
+
+void TeamFoundationClient::checkInProject()
+{
+    QTC_ASSERT(m_plugin->currentState().hasTopLevel(), return);
+    const QString topLevel = m_plugin->currentState().topLevel();
+    checkIn(topLevel);
 }
 
 TeamFoundationResponse TeamFoundationClient::runTf(const QString &workingDirectory,
@@ -194,12 +345,11 @@ TeamFoundationResponse TeamFoundationClient::runVcs(
     if (!m_plugin->versionControl()->isConfigured())
     {
         response.error = true;
-        response.message = tr("Team Foundation is not configured!");
         return response;
     }
 
     QStringList allArguments(arguments);
-    allArguments.append(QLatin1String("/prompt"));
+    addAuthentication(allArguments);
 
     const Utils::SynchronousProcessResponse runVcsResponse =
             m_plugin->runVcs(workingDirectory,
@@ -209,10 +359,26 @@ TeamFoundationResponse TeamFoundationClient::runVcs(
                              flags);
 
     response.error = runVcsResponse.result != Utils::SynchronousProcessResponse::Finished;
-    if (response.error)
-        response.message = runVcsResponse.exitMessage(executable, m_plugin->settings().timeOut());
-
     response.standardError = runVcsResponse.stdErr;
     response.standardOut = runVcsResponse.stdOut;
     return response;
+}
+
+void TeamFoundationClient::addAuthentication(QStringList &arguments)
+{
+    TeamFoundationPlugin* plugin = TeamFoundationPlugin::instance();
+    const QString username = plugin->settings().username();
+    const QString password = plugin->settings().password();
+    if (username.isEmpty() || password.isEmpty())
+        return;
+
+    const QString parameter = QString(QLatin1String("/login:%1,%2")).arg(username, password);
+    arguments.append(parameter);
+}
+
+void TeamFoundationClient::addRecursive(QStringList &arguments, const QString &path) const
+{
+    QFileInfo fileInfo(path);
+    if (fileInfo.isDir())
+        arguments << QLatin1String("/recursive");
 }
