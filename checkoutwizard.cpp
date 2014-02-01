@@ -63,16 +63,18 @@ VcsBase::Command *CheckoutWizard::createCommand(const QList<QWizardPage*> &param
     QTC_ASSERT(cwp, return 0);
     const TeamFoundationSettings settings = TeamFoundationPlugin::instance()->settings();
     const QString directory = cwp->directory();
+    const QString workingDirectory = cwp->path();
+    *checkoutPath = workingDirectory + QLatin1Char('/') + directory;
+
     QStringList mapArgs, getArgs;
     mapArgs << QLatin1String("workfold")
          << QLatin1String("/map")
          << cwp->repository()
-         << directory;
+         << *checkoutPath;
 
     getArgs << QLatin1String("get") << directory << QLatin1String("/recursive");
 
-    const QString workingDirectory = cwp->path();
-    *checkoutPath = workingDirectory + QLatin1Char('/') + directory;
+
     VcsBase::Command *command = new VcsBase::Command(settings.binaryPath(), workingDirectory,
                                                      QProcessEnvironment::systemEnvironment());
 

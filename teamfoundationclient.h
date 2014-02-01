@@ -47,13 +47,13 @@ public:
     bool addFile(const QString &file) const;
     bool deleteFile(const QString &file) const;
     bool moveFile(const QString &from, const QString &to) const;
-    bool compare(const QString &file);
-    bool undo(const QString &file);
-    bool checkIn(const QString &file);
+    bool compare(const QString &path);
+    bool undo(const QString &path);
+    bool checkIn(const QString &path);
     bool checkoutFile(const QString &fileName) const;
     bool annotateFile(const QString &fileName) const;
-    bool getLatest(const QString &fileName) const;
-    bool history(const QString &fileName) const;
+    bool getLatest(const QString &path) const;
+    bool history(const QString &path) const;
 
     bool managesFile(const QString &fileName) const;    
     bool managesDirectory(const QString &directory) const;

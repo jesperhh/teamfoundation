@@ -81,50 +81,50 @@ bool TeamFoundationClient::moveFile(const QString &from, const QString &to) cons
     return !resp.error;
 }
 
-bool TeamFoundationClient::compare(const QString &fileName)
+bool TeamFoundationClient::compare(const QString &path)
 {
-    RUN_PREAMBLE_1(fileName)
+    RUN_PREAMBLE_1(path)
 
     parameters << QLatin1String("difference");
-    parameters << fileName;
+    parameters << path;
     parameters << QLatin1String("/format:Visual");
     parameters << QLatin1String("/prompt");
 
-    addRecursive(parameters, fileName);
+    addRecursive(parameters, path);
 
-    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters);
+    const TeamFoundationResponse resp = runTf(pathInfo.absolutePath(), parameters);
     return !resp.error;
 }
 
-bool TeamFoundationClient::undo(const QString &fileName)
+bool TeamFoundationClient::undo(const QString &path)
 {
-    RUN_PREAMBLE_1(fileName)
+    RUN_PREAMBLE_1(path)
 
     parameters << QLatin1String("undo");
-    parameters << fileName;
+    parameters << path;
 
-    addRecursive(parameters, fileName);
+    addRecursive(parameters, path);
 
-    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters,
+    const TeamFoundationResponse resp = runTf(pathInfo.absolutePath(), parameters,
         VcsBasePlugin::ShowStdOutInLogWindow | VcsBasePlugin::FullySynchronously);
     if (!resp.error)
     {
-        m_plugin->emitChangedSignal(fileName);
+        m_plugin->emitChangedSignal(path);
     }
     return !resp.error;
 }
 
-bool TeamFoundationClient::checkIn(const QString &fileName)
+bool TeamFoundationClient::checkIn(const QString &path)
 {
-    RUN_PREAMBLE_1(fileName)
+    RUN_PREAMBLE_1(path)
 
     parameters << QLatin1String("checkin");
-    parameters << fileName;
+    parameters << path;
     parameters << QLatin1String("/prompt");
 
-    addRecursive(parameters, fileName);
+    addRecursive(parameters, path);
 
-    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters);
+    const TeamFoundationResponse resp = runTf(pathInfo.absolutePath(), parameters);
     return !resp.error;
 }
 
@@ -150,35 +150,35 @@ bool TeamFoundationClient::annotateFile(const QString &fileName) const
     return !resp.error;
 }
 
-bool TeamFoundationClient::getLatest(const QString &fileName) const
+bool TeamFoundationClient::getLatest(const QString &path) const
 {
-    RUN_PREAMBLE_1(fileName)
+    RUN_PREAMBLE_1(path)
 
     parameters << QLatin1String("get");
-    parameters << fileName;
+    parameters << path;
     parameters << QLatin1String("/prompt");
 
-    addRecursive(parameters, fileName);
+    addRecursive(parameters, path);
 
-    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters);
+    const TeamFoundationResponse resp = runTf(pathInfo.absolutePath(), parameters);
     if (!resp.error)
     {
-        m_plugin->emitChangedSignal(fileName);
+        m_plugin->emitChangedSignal(path);
     }
     return !resp.error;
 }
 
-bool TeamFoundationClient::history(const QString &fileName) const
+bool TeamFoundationClient::history(const QString &path) const
 {
-    RUN_PREAMBLE_1(fileName)
+    RUN_PREAMBLE_1(path)
 
     parameters << QLatin1String("history");
-    parameters << fileName;
+    parameters << path;
     parameters << QLatin1String("/prompt");
 
-    addRecursive(parameters, fileName);
+    addRecursive(parameters, path);
 
-    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters);
+    const TeamFoundationResponse resp = runTf(pathInfo.absolutePath(), parameters);
     return !resp.error;
 }
 
