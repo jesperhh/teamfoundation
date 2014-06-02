@@ -33,11 +33,11 @@ OTHER_FILES += TeamFoundation.pluginspec.in
 
 ## set the QTC_SOURCE environment variable to override the setting here
 QTCREATOR_SOURCES = $$(QTC_SOURCE)
-isEmpty(QTCREATOR_SOURCES):QTCREATOR_SOURCES=C:/Qt/CreatorFromSource/qt-creator-opensource-src-3.0.0/
+isEmpty(QTCREATOR_SOURCES):QTCREATOR_SOURCES=C:/Qt/CreatorFromSource/qt-creator-opensource-src-3.1.0/
 
 ## set the QTC_BUILD environment variable to override the setting here
 IDE_BUILD_TREE = $$(QTC_BUILD)
-isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=C:/Qt/CreatorFromSource/build-qtcreator-Desktop_Qt_5_2_0_MSVC2012_32bit-Release/
+isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=C:/Qt/CreatorFromSource/build-qtcreator-Desktop_Qt_5_2_1_MSVC2010_32bit-Release
 
 ## uncomment to build plugin into user config directory
 ## <localappdata>/plugins/<ideversion>

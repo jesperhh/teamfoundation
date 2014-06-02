@@ -56,23 +56,6 @@ void SettingsPageWidget::setSettings(const TeamFoundationSettings &s)
     m_ui.timeOutSpinBox->setValue(s.intValue(TeamFoundationSettings::timeoutKey));
 }
 
-QString SettingsPageWidget::searchKeywords() const
-{
-    QString rc;
-    QLatin1Char sep(' ');
-    QTextStream(&rc)
-            << sep << m_ui.generalGroupBox->title()
-            << sep << m_ui.commandLabel->text()
-            << sep << m_ui.tfptLabel->text()
-            << sep << m_ui.userGroupBox->title()
-            << sep << m_ui.usernameLabel->text()
-            << sep << m_ui.passwordLabel->text()
-            << sep << m_ui.miscGroupBox->title()
-            << sep << m_ui.timeOutLabel->text();
-    rc.remove(QLatin1Char('&'));
-    return rc;
-}
-
 SettingsPage::SettingsPage() :
     m_widget(0)
 {
@@ -80,12 +63,12 @@ SettingsPage::SettingsPage() :
     setDisplayName(tr("TeamFoundation"));
 }
 
-QWidget *SettingsPage::createPage(QWidget *parent)
+QWidget *SettingsPage::widget()
 {
-    m_widget = new SettingsPageWidget(parent);
-    m_widget->setSettings(TeamFoundationPlugin::instance()->settings());
-    if (m_searchKeywords.isEmpty())
-        m_searchKeywords = m_widget->searchKeywords();
+    if (!m_widget) {
+        m_widget = new SettingsPageWidget;
+        m_widget->setSettings(TeamFoundationPlugin::instance()->settings());
+    }
     return m_widget;
 }
 
@@ -94,7 +77,7 @@ void SettingsPage::apply()
     TeamFoundationPlugin::instance()->setSettings(m_widget->settings());
 }
 
-bool SettingsPage::matches(const QString &s) const
+void SettingsPage::finish()
 {
-    return m_searchKeywords.contains(s, Qt::CaseInsensitive);
+    delete m_widget;
 }

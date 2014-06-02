@@ -41,7 +41,7 @@ public:
     bool managesFile(const QString &workingDirectory, const QString &fileName) const;
     bool isConfigured() const;
     bool supportsOperation(Operation operation) const;
-    OpenSupportMode openSupportMode() const;
+    OpenSupportMode openSupportMode(const QString &fileName) const;
     bool vcsOpen(const QString &fileName);
     bool vcsAdd(const QString &fileName);
     bool vcsDelete(const QString &filename);

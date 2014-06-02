@@ -77,8 +77,9 @@ bool TeamFoundationControl::supportsOperation(Operation operation) const
     return result;
 }
 
-Core::IVersionControl::OpenSupportMode TeamFoundationControl::openSupportMode() const
+Core::IVersionControl::OpenSupportMode TeamFoundationControl::openSupportMode(const QString &fileName) const
 {
+    Q_UNUSED(fileName);
     return Core::IVersionControl::OpenMandatory;
 }
 

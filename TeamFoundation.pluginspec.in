@@ -1,4 +1,4 @@
-<plugin name=\"TeamFoundation\" version=\"0.1.0\" compatVersion=\"0.1.0\">
+<plugin name=\"TeamFoundation\" version=\"0.2.0\" compatVersion=\"0.2.0\">
     <vendor>Jesper Hellesø Hansen</vendor>
     <copyright>(C) 2014 Jesper Hellesø Hansen</copyright>
     <license>GNU Lesser General Public License 2.1</license>

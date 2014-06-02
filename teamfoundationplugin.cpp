@@ -32,8 +32,7 @@
 #include <coreplugin/actionmanager/actionmanager.h>
 #include <coreplugin/actionmanager/actioncontainer.h>
 #include <coreplugin/coreconstants.h>
-
-#include <locator/commandlocator.h>
+#include <coreplugin/locator/commandlocator.h>
 
 #include <QMenu>
 #include <QFileInfo>
@@ -87,7 +86,7 @@ void TeamFoundationPlugin::createMenus()
     Core::ActionContainer* container = Core::ActionManager::createMenu(Core::Id(Constants::MENU_ID));
 
     const QString prefix = QLatin1String("tfs");
-    m_commandLocator = new Locator::CommandLocator("Team Foundation", prefix, prefix);
+    m_commandLocator = new Core::CommandLocator("Team Foundation", prefix, prefix);
     addAutoReleasedObject(m_commandLocator);
 
     QAction* action;
@@ -118,7 +117,7 @@ void TeamFoundationPlugin::createMenus()
     container->addSeparator(context);
 
     action = createRepositoryAction(container, context, tr("History (Repository)"), "TeamFoundation.HistoryProject");
-    connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(historProject()));
+    connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(historyProject()));
 
     action = createRepositoryAction(container, context, tr("Get latest (Repository)"), "TeamFoundation.GetLatestProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(getLatestProject()));
@@ -185,7 +184,7 @@ void TeamFoundationPlugin::emitChangedSignal(const QString &path) const
     }
 }
 
-const TeamFoundationSettings &TeamFoundationPlugin::settings() const
+TeamFoundationSettings TeamFoundationPlugin::settings() const
 {
     return this->m_settings;
 }
@@ -221,9 +220,10 @@ void TeamFoundationPlugin::updateActions(VcsBase::VcsBasePlugin::ActionState as)
     m_commandLocator->setEnabled(hasTopLevel);
 
     const QString currentFile = currentState().currentFileName();
-    for (Utils::ParameterAction *action: m_fileActionList)
+    QList<Utils::ParameterAction*>::iterator iter;
+    for (iter = m_fileActionList.begin(); iter != m_fileActionList.end(); ++iter)
     {
-        action->setParameter(currentFile);
+        (*iter)->setParameter(currentFile);
     }
 }
 

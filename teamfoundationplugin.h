@@ -33,14 +33,11 @@ class QAction;
 QT_END_NAMESPACE
 
 namespace Core {
+class CommandLocator;
 class ActionManager;
 class ActionContainer;
 class Id;
 class Command;
-}
-
-namespace Locator {
-class CommandLocator;
 }
 
 namespace Utils {
@@ -63,7 +60,7 @@ public:
     ~TeamFoundationPlugin();
 
     bool initialize(const QStringList &arguments, QString *errorString);
-    const TeamFoundationSettings &settings() const;
+    TeamFoundationSettings settings() const;
     void setSettings(const TeamFoundationSettings &s);
     const TeamFoundationClient *client() const;
     static TeamFoundationPlugin *instance();
@@ -88,7 +85,7 @@ protected:
 
 private:
     TeamFoundationSettings m_settings;
-    Locator::CommandLocator *m_commandLocator;
+    Core::CommandLocator *m_commandLocator;
     QAction *m_menuAction;
     QList<Utils::ParameterAction*> m_fileActionList;
     QList<QAction*> m_projectActionList;
