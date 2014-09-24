@@ -1,7 +1,8 @@
-<plugin name=\"TeamFoundation\" version=\"0.2.0\" compatVersion=\"0.2.0\">
+<plugin name=\"TeamFoundation\" version=\"0.3.0\" compatVersion=\"$$QTCREATOR_COMPAT_VERSION\">
     <vendor>Jesper Hellesø Hansen</vendor>
     <copyright>(C) 2014 Jesper Hellesø Hansen</copyright>
     <license>GNU Lesser General Public License 2.1</license>
+    <category>Version Control</category>
     <description>Team Foundation Server plugin for Qt Creator</description>
     <url>http://www.oktet.net</url>
     $$dependencyList

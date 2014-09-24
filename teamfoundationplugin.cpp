@@ -152,7 +152,7 @@ bool TeamFoundationPlugin::initialize(const QStringList &arguments, QString *err
 
     m_teamFoundationClient = new TeamFoundationClient(this);
     addAutoReleasedObject(new SettingsPage);
-    addAutoReleasedObject(new CheckoutWizard);
+    addAutoReleasedObject(new CheckoutWizardFactory);
 
     createMenus();
 

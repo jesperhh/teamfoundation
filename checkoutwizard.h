@@ -22,21 +22,30 @@
 #ifndef CHECKOUTWIZARD_H
 #define CHECKOUTWIZARD_H
 
+#include <vcsbase/basecheckoutwizardfactory.h>
 #include <vcsbase/basecheckoutwizard.h>
 
 namespace TeamFoundation {
 namespace Internal {
 
+class CheckoutWizardFactory : public VcsBase::BaseCheckoutWizardFactory
+{
+    Q_OBJECT
+
+public:
+    CheckoutWizardFactory();
+
+    VcsBase::BaseCheckoutWizard *create(const Utils::FileName &path, QWidget *parent = 0) const;
+};
+
 class CheckoutWizard : public VcsBase::BaseCheckoutWizard
 {
     Q_OBJECT
 public:
-    CheckoutWizard();
+    CheckoutWizard(const Utils::FileName &path, QWidget *parent = 0);
 
-private:
-    QList<QWizardPage*> createParameterPages(const QString &path);
-    VcsBase::Command *createCommand(const QList<QWizardPage*> &parameterPage,
-                                    QString *checkoutPath);
+protected:
+    VcsBase::Command *createCommand(Utils::FileName *checkoutPath);
 };
 
 } // namespace Internal

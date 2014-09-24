@@ -35,7 +35,7 @@
 namespace TeamFoundation {
 namespace Internal {
 
-CheckoutWizard::CheckoutWizard()
+CheckoutWizardFactory::CheckoutWizardFactory()
 {
     setId(QLatin1String(TeamFoundation::Constants::VCS_ID_TEAMFOUNDATION));
     setIcon(QIcon(QLatin1String(":/teamfoundation/images/teamfoundation.png")));
@@ -43,34 +43,42 @@ CheckoutWizard::CheckoutWizard()
     setDisplayName(tr("Team Foundation Checkout"));
 }
 
-QList<QWizardPage*> CheckoutWizard::createParameterPages(const QString &path)
+VcsBase::BaseCheckoutWizard *CheckoutWizardFactory::create(const Utils::FileName &path, QWidget *parent) const
+{
+    return new CheckoutWizard(path, parent);
+}
+
+CheckoutWizard::CheckoutWizard(const Utils::FileName &path, QWidget *parent) :
+    VcsBase::BaseCheckoutWizard(path, parent)
 {
     QList<QWizardPage*> rc;
     const Core::IVersionControl *vc = TeamFoundationPlugin::instance()->versionControl();
     if (!vc->isConfigured())
-        rc.append(new VcsBase::VcsConfigurationPage(vc));
+        addPage(new VcsBase::VcsConfigurationPage(vc));
     CheckoutWizardPage *cwp = new CheckoutWizardPage;
-    cwp->setPath(path);
-    rc.append(cwp);
-    return rc;
+    cwp->setPath(path.toString());
+    addPage(cwp);
 }
 
-VcsBase::Command *CheckoutWizard::createCommand(const QList<QWizardPage*> &parameterPages,
-                                                QString *checkoutPath)
+VcsBase::Command *CheckoutWizard::createCommand(Utils::FileName *checkoutPath)
 {
     // Collect parameters for the checkout command.
-    const CheckoutWizardPage *cwp = qobject_cast<const CheckoutWizardPage *>(parameterPages.front());
+    const CheckoutWizardPage *cwp = 0;
+        foreach (int pageId, pageIds()) {
+            if ((cwp = qobject_cast<const CheckoutWizardPage *>(page(pageId))))
+                break;
+        }
     QTC_ASSERT(cwp, return 0);
     const TeamFoundationSettings settings = TeamFoundationPlugin::instance()->settings();
     const QString directory = cwp->directory();
     const QString workingDirectory = cwp->path();
-    *checkoutPath = workingDirectory + QLatin1Char('/') + directory;
+    *checkoutPath = Utils::FileName::fromString(workingDirectory + QLatin1Char('/') + directory);
 
     QStringList mapArgs, getArgs;
     mapArgs << QLatin1String("workfold")
          << QLatin1String("/map")
          << cwp->repository()
-         << *checkoutPath;
+         << checkoutPath->toString();
 
     getArgs << QLatin1String("get") << directory << QLatin1String("/recursive");
 
