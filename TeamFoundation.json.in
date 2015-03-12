@@ -1,0 +1,11 @@
+{
+    \"Name\" : \"TeamFoundation\",
+    \"Version\" : \"$$QTCREATOR_VERSION\",
+    \"CompatVersion\" : \"$$QTCREATOR_COMPAT_VERSION\",
+    \"Vendor\" : \"Jesper Hellesø Hansen\",
+    \"Copyright\" : \"(C) 2014 Jesper Hellesø Hansen\",
+    \"Category\" : \"Version Control\",
+    \"Description\" : \"Team Foundation Server plugin for Qt Creator.\",
+    \"Url\" : \"http://www.oktet.net\",
+    $$dependencyList
+}

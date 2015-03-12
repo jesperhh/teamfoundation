@@ -337,7 +337,7 @@ TeamFoundationResponse TeamFoundationClient::runTfpt(const QString &workingDirec
 
 TeamFoundationResponse TeamFoundationClient::runVcs(
         const QString &workingDirectory,
-        const QString &executable,
+        const Utils::FileName &executable,
         const QStringList &arguments,
         unsigned flags) const
 {

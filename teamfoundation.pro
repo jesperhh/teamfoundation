@@ -27,7 +27,7 @@ FORMS += settingspage.ui
 
 RESOURCES += teamfoundation.qrc
 
-OTHER_FILES += TeamFoundation.pluginspec.in
+OTHER_FILES += TeamFoundation.json.in
 
 # Qt Creator linking
 
@@ -48,23 +48,6 @@ isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=D:/Qt/Tools/build-qtcreator-Desktop_Qt_5_
 # USE_USER_DESTDIR = yes
 
 PROVIDER = TeamFoundation
-
-###### If the plugin can be depended upon by other plugins, this code needs to be outsourced to
-###### <dirname>_dependencies.pri, where <dirname> is the name of the directory containing the
-###### plugin's sources.
-
-QTC_PLUGIN_NAME = TeamFoundation
-QTC_LIB_DEPENDS += \
-    # nothing here at this time
-
-QTC_PLUGIN_DEPENDS += \
-    coreplugin \
-    vcsbase
-
-QTC_PLUGIN_RECOMMENDS += \
-    # optional plugin dependencies. nothing here at this time
-
-###### End _dependencies.pri contents ######
 
 include($$QTCREATOR_SOURCES/src/qtcreatorplugin.pri)
 

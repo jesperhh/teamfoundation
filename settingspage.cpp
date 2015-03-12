@@ -49,8 +49,8 @@ TeamFoundationSettings SettingsPageWidget::settings() const
 
 void SettingsPageWidget::setSettings(const TeamFoundationSettings &s)
 {
-    m_ui.pathChooser->setPath(s.binaryPath());
-    m_ui.tfptPathChooser->setPath(s.tftpBinaryPath());
+    m_ui.pathChooser->setPath(s.binaryPath().toString());
+    m_ui.tfptPathChooser->setPath(s.tftpBinaryPath().toString());
     m_ui.usernameLineEdit->setText(s.stringValue(TeamFoundationSettings::userNameKey));
     m_ui.passwordLineEdit->setText(s.stringValue(TeamFoundationSettings::passwordKey));
     m_ui.timeOutSpinBox->setValue(s.intValue(TeamFoundationSettings::timeoutKey));

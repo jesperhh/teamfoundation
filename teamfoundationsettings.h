@@ -36,9 +36,9 @@ public:
     QString password() const;
     QString username() const;
     int timeOut() const;
-    QString tftpBinaryPath() const;
+    Utils::FileName tftpBinaryPath() const;
 private:
-    mutable QString m_tfptBinaryPath;
+    mutable Utils::FileName m_tfptBinaryPath;
 };
 
 } // namespace Internal

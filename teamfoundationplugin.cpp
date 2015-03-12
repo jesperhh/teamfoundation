@@ -144,7 +144,9 @@ bool TeamFoundationPlugin::initialize(const QStringList &arguments, QString *err
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)
 
-    initializeVcs(new TeamFoundationControl(this));
+    Core::Context context("TFS Context");
+
+    initializeVcs(new TeamFoundationControl(this), context);
 
     m_teamFoundationPluginInstance = this;
 
@@ -283,6 +285,3 @@ void TeamFoundationPlugin::testGetRepositoryUrl()
     QCOMPARE(output, result);
 }
 #endif
-
-Q_EXPORT_PLUGIN2(TeamFoundation, TeamFoundationPlugin)
-

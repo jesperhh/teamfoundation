@@ -52,7 +52,7 @@ int TeamFoundationSettings::timeOut() const
     return 1000 * intValue(timeoutKey);
 }
 
-QString TeamFoundationSettings::tftpBinaryPath() const
+Utils::FileName TeamFoundationSettings::tftpBinaryPath() const
 {
     if (m_tfptBinaryPath.isEmpty()) {
         m_tfptBinaryPath = Utils::Environment::systemEnvironment().searchInPath(
