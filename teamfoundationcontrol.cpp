@@ -47,11 +47,6 @@ Core::Id TeamFoundationControl::id() const
 bool TeamFoundationControl::isConfigured() const
 {
     const Utils::FileName binary = m_plugin->settings().binaryPath();
-    if (binary.isEmpty())
-    {
-        return false;
-    }
-
     QFileInfo fi = binary.toFileInfo();
     return fi.exists() && fi.isFile() && fi.isExecutable();
 }

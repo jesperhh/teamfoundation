@@ -33,11 +33,17 @@ OTHER_FILES += TeamFoundation.json.in
 
 ## set the QTC_SOURCE environment variable to override the setting here
 QTCREATOR_SOURCES = $$(QTC_SOURCE)
-isEmpty(QTCREATOR_SOURCES):QTCREATOR_SOURCES=C:/Qt/Tools/qt-creator-opensource-src-3.3.0
+isEmpty(QTCREATOR_SOURCES) {
+    QTCREATOR_SOURCES=$$files(../qt-creator*)
+	QTCREATOR_SOURCES=$$first(QTCREATOR_SOURCES)
+}
 
 ## set the QTC_BUILD environment variable to override the setting here
 IDE_BUILD_TREE = $$(QTC_BUILD)
-isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=C:/Qt/Tools/build-qtcreator-Desktop_Qt_5_4_0_MSVC2010_OpenGL_32bit-Release
+isEmpty(IDE_BUILD_TREE) {
+    IDE_BUILD_TREE=$$files(../build-qtcreator-*)
+    IDE_BUILD_TREE=$$first(IDE_BUILD_TREE)
+}
 
 ## uncomment to build plugin into user config directory
 ## <localappdata>/plugins/<ideversion>
@@ -48,23 +54,6 @@ isEmpty(IDE_BUILD_TREE):IDE_BUILD_TREE=C:/Qt/Tools/build-qtcreator-Desktop_Qt_5_
 # USE_USER_DESTDIR = yes
 
 PROVIDER = TeamFoundation
-
-###### If the plugin can be depended upon by other plugins, this code needs to be outsourced to
-###### <dirname>_dependencies.pri, where <dirname> is the name of the directory containing the
-###### plugin's sources.
-
-QTC_PLUGIN_NAME = TeamFoundation
-QTC_LIB_DEPENDS += \
-    # nothing here at this time
-
-QTC_PLUGIN_DEPENDS += \
-    coreplugin \
-    vcsbase
-
-QTC_PLUGIN_RECOMMENDS += \
-    # optional plugin dependencies. nothing here at this time
-
-###### End _dependencies.pri contents ######
 
 include($$QTCREATOR_SOURCES/src/qtcreatorplugin.pri)
 
