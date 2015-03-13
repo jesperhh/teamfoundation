@@ -46,13 +46,13 @@ Core::Id TeamFoundationControl::id() const
 
 bool TeamFoundationControl::isConfigured() const
 {
-    const QString binary = m_plugin->settings().binaryPath();
+    const Utils::FileName binary = m_plugin->settings().binaryPath();
     if (binary.isEmpty())
     {
         return false;
     }
 
-    QFileInfo fi(binary);
+    QFileInfo fi = binary.toFileInfo();
     return fi.exists() && fi.isFile() && fi.isExecutable();
 }
 

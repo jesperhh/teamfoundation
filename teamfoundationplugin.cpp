@@ -28,7 +28,6 @@
 #include "settingspage.h"
 
 #include <coreplugin/icore.h>
-#include <coreplugin/icontext.h>
 #include <coreplugin/actionmanager/actionmanager.h>
 #include <coreplugin/actionmanager/actioncontainer.h>
 #include <coreplugin/coreconstants.h>
@@ -41,6 +40,8 @@
 #include <utils/parameteraction.h>
 
 using namespace TeamFoundation::Internal;
+
+const char TEAMFOUNDATION_CONTEXT[] = "Team Foundation Context";
 
 TeamFoundationPlugin *TeamFoundationPlugin::m_teamFoundationPluginInstance = 0;
 
@@ -80,9 +81,8 @@ QAction* TeamFoundationPlugin::createRepositoryAction(Core::ActionContainer* con
     return action;
 }
 
-void TeamFoundationPlugin::createMenus()
+void TeamFoundationPlugin::createMenus(const Core::Context &context)
 {
-    Core::Context context(Core::Constants::C_GLOBAL);
     Core::ActionContainer* container = Core::ActionManager::createMenu(Core::Id(Constants::MENU_ID));
 
     const QString prefix = QLatin1String("tfs");
@@ -144,7 +144,9 @@ bool TeamFoundationPlugin::initialize(const QStringList &arguments, QString *err
     Q_UNUSED(arguments)
     Q_UNUSED(errorString)
 
-    initializeVcs(new TeamFoundationControl(this));
+    Core::Context context(TEAMFOUNDATION_CONTEXT);
+
+    initializeVcs(new TeamFoundationControl(this), context);
 
     m_teamFoundationPluginInstance = this;
 
@@ -154,7 +156,7 @@ bool TeamFoundationPlugin::initialize(const QStringList &arguments, QString *err
     addAutoReleasedObject(new SettingsPage);
     addAutoReleasedObject(new CheckoutWizardFactory);
 
-    createMenus();
+    createMenus(context);
 
     return true;
 }
@@ -283,6 +285,3 @@ void TeamFoundationPlugin::testGetRepositoryUrl()
     QCOMPARE(output, result);
 }
 #endif
-
-Q_EXPORT_PLUGIN2(TeamFoundation, TeamFoundationPlugin)
-

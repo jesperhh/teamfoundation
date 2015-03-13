@@ -75,7 +75,7 @@ private slots:
 #endif
 
 protected:
-    void createMenus();
+    void createMenus(const Core::Context &context);
     QAction *createFileAction(const Core::Context &context, Core::ActionContainer* container,
                                      const QString &emptyText, const QString &parameterText, const char *actionId);
     QAction *createRepositoryAction(Core::ActionContainer* container, Core::Context context,

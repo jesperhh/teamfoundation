@@ -84,7 +84,7 @@ private:
                                  unsigned flags = VcsBase::VcsBasePlugin::ShowStdOutInLogWindow) const;
     TeamFoundationResponse runTfpt(const QString &workingDirectory, const QStringList &arguments,
                                    unsigned flags = VcsBase::VcsBasePlugin::ShowStdOutInLogWindow) const;
-    TeamFoundationResponse runVcs(const QString &workingDirectory,	const QString &executable,
+    TeamFoundationResponse runVcs(const QString &workingDirectory,	const Utils::FileName &executable,
                                   const QStringList &arguments, unsigned flags) const;
 
     static QString getRepositoryUrl(const QString &workspaceInfo);

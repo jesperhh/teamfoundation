@@ -26,7 +26,7 @@
 #include "teamfoundationclient.h"
 
 #include <coreplugin/iversioncontrol.h>
-#include <vcsbase/command.h>
+#include <vcsbase/vcscommand.h>
 #include <vcsbase/vcsconfigurationpage.h>
 #include <utils/qtcassert.h>
 
@@ -41,6 +41,9 @@ CheckoutWizardFactory::CheckoutWizardFactory()
     setIcon(QIcon(QLatin1String(":/teamfoundation/images/teamfoundation.png")));
     setDescription(tr("Maps a Team Foundation Server folder and tries to load the contained project."));
     setDisplayName(tr("Team Foundation Checkout"));
+    setWizardCreator([this] (const Utils::FileName &path, QWidget *parent) {
+            return create(path, parent);
+        });
 }
 
 VcsBase::BaseCheckoutWizard *CheckoutWizardFactory::create(const Utils::FileName &path, QWidget *parent) const
@@ -60,7 +63,7 @@ CheckoutWizard::CheckoutWizard(const Utils::FileName &path, QWidget *parent) :
     addPage(cwp);
 }
 
-VcsBase::Command *CheckoutWizard::createCommand(Utils::FileName *checkoutPath)
+VcsBase::VcsCommand *CheckoutWizard::createCommand(Utils::FileName *checkoutPath)
 {
     // Collect parameters for the checkout command.
     const CheckoutWizardPage *cwp = 0;
@@ -83,7 +86,7 @@ VcsBase::Command *CheckoutWizard::createCommand(Utils::FileName *checkoutPath)
     getArgs << QLatin1String("get") << directory << QLatin1String("/recursive");
 
 
-    VcsBase::Command *command = new VcsBase::Command(settings.binaryPath(), workingDirectory,
+    VcsBase::VcsCommand *command = new VcsBase::VcsCommand(settings.binaryPath(), workingDirectory,
                                                      QProcessEnvironment::systemEnvironment());
 
     if (!cwp->collection().isEmpty())
