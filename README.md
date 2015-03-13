@@ -28,4 +28,5 @@ Installation
   - Qt Creator 3.0: http://www.oktet.net/files/teamfoundation.zip.
   - Qt Creator 3.1  http://www.oktet.net/files/teamfoundation310.zip
   - Qt Creator 3.2  http://www.oktet.net/files/TeamFoundation320.zip
+  - Qt Creator 3.3  http://www.oktet.net/files/TeamFoundation330.zip
 * Put the binaries in a folder named TeamFoundation in Qt Creators plugins directory (default is C:\Qt\Tools\QtCreator\lib\qtcreator\plugins). For Qt Creator 3.2 and newer, all plugins are stored directly in the plugin directory.
