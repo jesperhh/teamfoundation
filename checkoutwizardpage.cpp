@@ -35,10 +35,10 @@ CheckoutWizardPage::CheckoutWizardPage(QWidget *parent) :
     setBranchSelectorVisible(false);
 
     setRepository(QLatin1String("$/"));
-
     collectionEdit = new QLineEdit(this);
     collectionEdit->setObjectName(QLatin1String("collectionEdit"));
-    addRepositoryControl(tr("Collection: (leave empty for default"), collectionEdit);
+    collectionEdit->setText("http://tfs:8080/tfs/");
+    addRepositoryControl(tr("Collection:"), collectionEdit);
 
     workspaceEdit = new QLineEdit(this);
     workspaceEdit->setObjectName(QLatin1String("workspaceEdit"));

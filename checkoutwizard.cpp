@@ -27,7 +27,7 @@
 
 #include <coreplugin/iversioncontrol.h>
 #include <vcsbase/vcscommand.h>
-#include <vcsbase/vcsconfigurationpage.h>
+#include <vcsbase/wizard/vcsconfigurationpage.h>
 #include <utils/qtcassert.h>
 
 #include <QIcon>
@@ -54,10 +54,14 @@ VcsBase::BaseCheckoutWizard *CheckoutWizardFactory::create(const Utils::FileName
 CheckoutWizard::CheckoutWizard(const Utils::FileName &path, QWidget *parent) :
     VcsBase::BaseCheckoutWizard(path, parent)
 {
-    QList<QWizardPage*> rc;
     const Core::IVersionControl *vc = TeamFoundationPlugin::instance()->versionControl();
     if (!vc->isConfigured())
-        addPage(new VcsBase::VcsConfigurationPage(vc));
+    {
+        VcsBase::VcsConfigurationPage* configPage = new VcsBase::VcsConfigurationPage;
+        configPage->setVersionControl(vc);
+        addPage(configPage);
+    }
+
     CheckoutWizardPage *cwp = new CheckoutWizardPage;
     cwp->setPath(path.toString());
     addPage(cwp);

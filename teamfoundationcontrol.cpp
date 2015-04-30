@@ -59,12 +59,10 @@ bool TeamFoundationControl::supportsOperation(Operation operation) const
     case AddOperation:
     case DeleteOperation:
     case MoveOperation:
-    case GetRepositoryRootOperation:
     case AnnotateOperation:
         break;
     case CreateRepositoryOperation:
     case SnapshotOperations:
-    case CheckoutOperation:
         result = false;
         break;
     }

@@ -23,6 +23,7 @@
 #define TEAMFOUNDATIONSETTINGS_H
 
 #include <vcsbase/vcsbaseclientsettings.h>
+#include <utils/fileutils.h>
 
 namespace TeamFoundation {
 namespace Internal {
