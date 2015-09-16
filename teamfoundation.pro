@@ -7,9 +7,7 @@ SOURCES += \
         teamfoundationcontrol.cpp \
         teamfoundationsettings.cpp \
         settingspage.cpp \
-        teamfoundationclient.cpp \
-        checkoutwizard.cpp \
-        checkoutwizardpage.cpp
+        teamfoundationclient.cpp
 
 HEADERS += \
         teamfoundationplugin.h \
@@ -18,14 +16,10 @@ HEADERS += \
         teamfoundationcontrol.h \
         teamfoundationsettings.h \
         settingspage.h \
-        teamfoundationclient.h \
-        checkoutwizard.h \
-        checkoutwizardpage.h
+        teamfoundationclient.h
 
 
 FORMS += settingspage.ui
-
-RESOURCES += teamfoundation.qrc
 
 OTHER_FILES += TeamFoundation.json.in
 

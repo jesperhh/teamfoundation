@@ -25,9 +25,23 @@
 #include "teamfoundationconstants.h"
 
 #include <QDir>
+#include <utils/synchronousprocess.h>
 
 using namespace TeamFoundation;
 using namespace TeamFoundation::Internal;
+
+class IgnoreExitCodeInterpreter : public Utils::ExitCodeInterpreter
+{
+    Q_OBJECT
+public:
+    IgnoreExitCodeInterpreter(QObject *parent) : Utils::ExitCodeInterpreter(parent) {}
+    Utils::SynchronousProcessResponse::Result interpretExitCode(int /*code*/) const
+    {
+        return Utils::SynchronousProcessResponse::Finished;
+    }
+};
+
+#include "teamfoundationcontrol.moc"
 
 TeamFoundationControl::TeamFoundationControl(TeamFoundationPlugin *plugin) :
     m_plugin(plugin)
@@ -60,6 +74,7 @@ bool TeamFoundationControl::supportsOperation(Operation operation) const
     case DeleteOperation:
     case MoveOperation:
     case AnnotateOperation:
+    case InitialCheckoutOperation:
         break;
     case CreateRepositoryOperation:
     case SnapshotOperations:
@@ -157,4 +172,62 @@ void TeamFoundationControl::emitRepositoryChanged(const QString & repository)
 void TeamFoundationControl::emitConfigurationChanged()
 {
     emit configurationChanged();
+}
+
+
+Core::ShellCommand *TeamFoundation::Internal::TeamFoundationControl::createInitialCheckoutCommand(const QString &url, const Utils::FileName &baseDirectory, const QString &localName, const QStringList &extraArgs)
+{
+    const TeamFoundationSettings settings = TeamFoundationPlugin::instance()->settings();
+    const QString workingDirectory = baseDirectory.toString();
+    const QString checkoutPath = baseDirectory.toString() + QLatin1Char('/') + localName;
+
+    QString collection, workspace;
+    QString workspacePrefix = QLatin1Literal("/workspace:");
+    Q_FOREACH(QString var, extraArgs)
+    {
+        if (var.startsWith(QLatin1Literal("/collection:")))
+            collection = var;
+        else if (var.startsWith(workspacePrefix))
+            workspace = var.remove(0, workspacePrefix.length());
+    }
+
+    QStringList mapArgs, getArgs;
+    mapArgs << QLatin1String("workfold")
+         << QLatin1String("/map")
+         << url
+         << checkoutPath;
+
+    getArgs << QLatin1String("get") << localName << QLatin1String("/recursive");
+
+
+    VcsBase::VcsCommand *command = new VcsBase::VcsCommand(workingDirectory, QProcessEnvironment::systemEnvironment());
+
+    if (!collection.isEmpty())
+    {
+        mapArgs << collection;
+    }
+
+    if(!workspace.isEmpty())
+    {
+        QStringList makeDirArgs;
+        makeDirArgs << QLatin1String("/c") << QLatin1String("mkdir") << localName;
+        command->addJob(Utils::FileName::fromLatin1("cmd"), makeDirArgs, -1);
+
+        QStringList workspaceArgs;
+        workspaceArgs << QLatin1String("workspace")
+            << QLatin1String("/new")
+            << workspace
+            << collection;
+
+        TeamFoundationClient::addAuthentication(workspaceArgs);
+        command->addJob(settings.binaryPath(), workspaceArgs, -1, checkoutPath);
+
+        mapArgs << QLatin1Literal("/workspace:") + workspace;
+    }
+
+    TeamFoundationClient::addAuthentication(mapArgs);
+    TeamFoundationClient::addAuthentication(getArgs);
+    command->addJob(settings.binaryPath(), mapArgs, -1);
+    command->addJob(settings.binaryPath(), getArgs, -1);
+    return command;
 }

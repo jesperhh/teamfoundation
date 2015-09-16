@@ -30,4 +30,5 @@ Installation
   - Qt Creator 3.2  http://www.oktet.net/files/TeamFoundation320.zip
   - Qt Creator 3.3  http://www.oktet.net/files/TeamFoundation330.zip
   - Qt Creator 3.4  http://www.oktet.net/files/TeamFoundation340.zip
-* Put the binaries in a folder named TeamFoundation in Qt Creators plugins directory (default is C:\Qt\Tools\QtCreator\lib\qtcreator\plugins). For Qt Creator 3.2 and newer, all plugins are stored directly in the plugin directory.
+  - Qt Creator 3.5  http://www.oktet.net/files/TeamFoundation350.zip
+* Put the binaries in a folder named TeamFoundation in Qt Creators plugins directory (default is C:\Qt\Tools\QtCreator\lib\qtcreator\plugins). For Qt Creator 3.2 and newer, all plugins are stored directly in the plugin directory. For Qt 3.5 and later, the initial checkout wizard (icon.png and wizard.json) must be moved to C:\Qt\Tools\QtCreator\share\qtcreator\templates\wizards\projects\vcs\teamfoundation (or where you have installed Qt Creator).

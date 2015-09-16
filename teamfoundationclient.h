@@ -23,6 +23,7 @@
 #define TEAMFOUNDATIONCLIENT_H
 
 #include <vcsbase/vcsbaseplugin.h>
+#include <vcsbase/vcscommand.h>
 
 namespace TeamFoundation {
 namespace Internal {
@@ -81,9 +82,9 @@ private slots:
 
 private:
     TeamFoundationResponse runTf(const QString &workingDirectory, const QStringList &arguments,
-                                 unsigned flags = VcsBase::VcsBasePlugin::ShowStdOutInLogWindow) const;
+                                 unsigned flags = VcsBase::VcsCommand::ShowStdOut) const;
     TeamFoundationResponse runTfpt(const QString &workingDirectory, const QStringList &arguments,
-                                   unsigned flags = VcsBase::VcsBasePlugin::ShowStdOutInLogWindow) const;
+                                   unsigned flags = VcsBase::VcsCommand::ShowStdOut) const;
     TeamFoundationResponse runVcs(const QString &workingDirectory,	const Utils::FileName &executable,
                                   const QStringList &arguments, unsigned flags) const;
 

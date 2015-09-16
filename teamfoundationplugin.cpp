@@ -21,7 +21,6 @@
 
 #include "teamfoundationplugin.h"
 #include "teamfoundationconstants.h"
-#include "checkoutwizard.h"
 
 #include "teamfoundationcontrol.h"
 #include "teamfoundationclient.h"
@@ -154,7 +153,6 @@ bool TeamFoundationPlugin::initialize(const QStringList &arguments, QString *err
 
     m_teamFoundationClient = new TeamFoundationClient(this);
     addAutoReleasedObject(new SettingsPage);
-    addAutoReleasedObject(new CheckoutWizardFactory);
 
     createMenus(context);
 

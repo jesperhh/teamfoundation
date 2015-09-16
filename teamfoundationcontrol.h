@@ -50,6 +50,7 @@ public:
     bool vcsCheckout(const QString &directory, const QByteArray &url);
     QString vcsGetRepositoryURL(const QString &directory);
     bool vcsAnnotate(const QString &file, int line);
+    Core::ShellCommand *createInitialCheckoutCommand(const QString &url, const Utils::FileName &baseDirectory, const QString &localName, const QStringList &extraArgs);
 
     void emitFilesChanged(const QStringList &files);
     void emitRepositoryChanged(const QString &repository);

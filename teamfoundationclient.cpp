@@ -39,9 +39,9 @@
 using namespace TeamFoundation::Internal;
 using namespace VcsBase;
 const int SuppressCompletely =
-        VcsBasePlugin::SuppressStdErrInLogWindow |
-        VcsBasePlugin::SuppressFailMessageInLogWindow |
-        VcsBasePlugin::SuppressCommandLogging;
+        VcsCommand::SuppressStdErr |
+        VcsCommand::SuppressFailMessage |
+        VcsCommand::SuppressCommandLogging;
 
 TeamFoundationClient::TeamFoundationClient(TeamFoundationPlugin *plugin) : QObject(plugin),
     m_plugin(plugin)
@@ -77,7 +77,7 @@ bool TeamFoundationClient::moveFile(const QString &from, const QString &to) cons
     parameters << toInfo.absoluteFilePath();
 
     const TeamFoundationResponse resp = runTf(fromInfo.absolutePath(), parameters,
-            VcsBasePlugin::ShowStdOutInLogWindow | VcsBasePlugin::FullySynchronously);
+            VcsCommand::ShowStdOut | VcsCommand::FullySynchronously);
     return !resp.error;
 }
 
@@ -106,7 +106,7 @@ bool TeamFoundationClient::undo(const QString &path)
     addRecursive(parameters, path);
 
     const TeamFoundationResponse resp = runTf(pathInfo.absolutePath(), parameters,
-        VcsBasePlugin::ShowStdOutInLogWindow | VcsBasePlugin::FullySynchronously);
+        VcsCommand::ShowStdOut | VcsCommand::FullySynchronously);
     if (!resp.error)
     {
         m_plugin->emitChangedSignal(path);
