@@ -7,15 +7,17 @@
     "trDisplayName": "Team Foundation Checkout",
     "trDisplayCategory": "Import Project",
     "icon": "icon.png",
-    "enabled": "%{JS: [ %{Plugins} ].indexOf('Team Foundations') >= 0}",
+    "enabled": "%{JS: [ %{Plugins} ].indexOf('TeamFoundation') >= 0}",
 
     "options":
     [
-        { "key": "vcsId", "value": "J.Subversion" },
+        { "key": "vcsId", "value": "T.TeamFoundation" },
         { "key": "vcsName", "value": "%{JS: Vcs.displayName('%{vcsId}')}" },
-        { "key": "SR", "value": "%{JS: '%{Repo}'.replace(/\\/trunk$/, '').replace(/\\/$/, '') }"},
+        { "key": "SR", "value": "%{JS: '%{Repo}'.replace(/\\/$/, '') }"},
         { "key": "defaultDir", "value": "%{JS: '%{SR}'.substr('%{SR}'.lastIndexOf('/') + 1).replace(/\\./, '-') }"},
-        { "key": "TargetPath", "value": "%{Path}/%{Dir}" }
+        { "key": "TargetPath", "value": "%{Path}/%{Dir}" },
+        { "key": "CollectionArg", "value": "%{JS: '%{Collection}' !== '' ? '/collection:' + '%{Collection}' : ''}" },
+        { "key": "WorkspaceArg", "value": "%{JS: '%{Workspace}' !== '' ? '/workspace:' + '%{Workspace}' : ''}" }
     ],
 
     "pages":
@@ -31,7 +33,7 @@
         {
             "trDisplayName": "Location",
             "trShortTitle": "Location",
-            "trSubTitle": "Specify repository URL, checkout directory, and path.",
+            "trSubTitle": "Specify server path, checkout directory, and path.",
             "typeId": "Fields",
             "data" :
             [
@@ -39,6 +41,24 @@
                     "name": "Repo",
                     "trDisplayName": "Repository:",
                     "mandatory": true,
+                    "type": "LineEdit",
+                    "data":
+                    {
+                        "trText": "$/"
+                    }
+                },
+                {
+                    "name": "Collection",
+                    "trDisplayName": "Collection:",
+                    "type": "LineEdit",
+                    "data":
+                    {
+                        "trText": "http://tfs:8080/tfs/DefaultCollection"
+                    }
+                },
+                {
+                    "name": "Workspace",
+                    "trDisplayName": "Workspace:",
                     "type": "LineEdit"
                 },
                 {
@@ -68,16 +88,6 @@
                     {
                         "trText": "%{defaultDir}"
                     }
-                },
-                {
-                    "name": "TrustCert",
-                    "trDisplayName": "Trust Server Certificate",
-                    "type": "CheckBox",
-                    "data":
-                    {
-                        "checkedValue": "--trust-server-cert",
-                        "uncheckedValue": ""
-                    }
                 }
             ]
         },
@@ -88,11 +98,15 @@
             "data" :
             {
                 "vcsId": "%{vcsId}",
-                "trRunMessage": "Running Subversion checkout...",
+                "trRunMessage": "Running Team Foundation checkout...",
                 "repository": "%{Repo}",
                 "baseDirectory": "%{Path}",
                 "checkoutName": "%{Dir}",
-                "extraArguments": [ "%{TrustCert}" ]
+                "extraArguments":
+                [
+                    "%{CollectionArg}",
+                    "%{WorkspaceArg}"
+                ]
             }
         }
     ],

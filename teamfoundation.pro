@@ -21,7 +21,9 @@ HEADERS += \
 
 FORMS += settingspage.ui
 
-OTHER_FILES += TeamFoundation.json.in
+OTHER_FILES += TeamFoundation.json.in \
+            wizard/wizard.json \
+            wizard/icon.png
 
 # Qt Creator linking
 
