@@ -53,3 +53,9 @@ PROVIDER = TeamFoundation
 
 include($$QTCREATOR_SOURCES/src/qtcreatorplugin.pri)
 
+## define output path
+!isEmpty(OUTPUT_PATH) {
+    DESTDIR = $$OUTPUT_PATH
+    message("You set output path to $$DESTDIR")
+}
+message("Plugin output path is $$DESTDIR")
