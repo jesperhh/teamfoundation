@@ -1,7 +1,8 @@
 Team Foundation Server plugin for Qt Creator
 ============================================
 
-https://ci.appveyor.com/api/projects/status/legfgybaww8qlinq?svg=true
+[![Build status](https://ci.appveyor.com/api/projects/status/legfgybaww8qlinq?svg=true)](https://ci.appveyor.com/project/jesperhh/teamfoundation)
+
 
 Requirements
 ------------
