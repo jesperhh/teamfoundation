@@ -2,17 +2,17 @@
 **
 ** Team Foundation Server plugin for Qt Creator
 ** Copyright (C) 2014 Jesper Hellesø Hansen
-** 
+**
 ** This library is free software; you can redistribute it and/or
 ** modify it under the terms of the GNU Lesser General Public
 ** License as published by the Free Software Foundation; either
 ** version 2.1 of the License, or (at your option) any later version.
-** 
+**
 ** This library is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ** Lesser General Public License for more details.
-** 
+**
 ** You should have received a copy of the GNU Lesser General Public
 ** License along with this library; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -26,6 +26,8 @@
 
 #include <QDir>
 #include <utils/synchronousprocess.h>
+#include <utils/qtcassert.h>
+#include <utils/algorithm.h>
 
 using namespace TeamFoundation;
 using namespace TeamFoundation::Internal;
@@ -43,10 +45,12 @@ public:
 
 #include "teamfoundationcontrol.moc"
 
+
+
+
 TeamFoundationControl::TeamFoundationControl(TeamFoundationPlugin *plugin) :
     m_plugin(plugin)
-{
-}
+{ }
 
 QString TeamFoundationControl::displayName() const
 {
@@ -113,19 +117,33 @@ bool TeamFoundationControl::vcsMove(const QString &from, const QString &to)
 
 bool TeamFoundationControl::managesDirectory(const QString &directory, QString *topLevel) const
 {
-    bool isManaged = m_plugin->client()->managesDirectory(directory);
+    bool isManaged = managesDirectoryEx(directory);
     if (!isManaged)
         return false;
 
     QDir dir(directory);
     while (true)
     {
+        QTC_ASSERT(topLevel, return true);
         *topLevel = dir.absolutePath();
-        if (!dir.cdUp() || !m_plugin->client()->managesDirectory(dir.absolutePath()))
+        if (!dir.cdUp() || !managesDirectoryEx(dir.absolutePath()))
             break;
     }
 
     return true;
+}
+
+bool TeamFoundationControl::managesDirectoryEx(const QString &directory) const
+{
+    if (m_managedDirectories.IsTopLevelOrSubDirectory(directory))
+        return true;
+
+    if (m_plugin->client()->managesDirectory(directory)) {
+        m_managedDirectories.Add(directory);
+        return true;
+    }
+
+    return false;
 }
 
 bool TeamFoundationControl::managesFile(const QString &workingDirectory, const QString &fileName) const
@@ -231,3 +249,36 @@ Core::ShellCommand *TeamFoundation::Internal::TeamFoundationControl::createIniti
     command->addJob(settings.binaryPath(), getArgs, -1);
     return command;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+void TeamFoundationControl::DirectoryTree::Add(const QString& directory)
+{
+    for (int i = 0; i < m_entries.size(); ++i) {
+        // candidate shadowed?
+        if (IsParentOrSame(m_entries[i], directory)) {
+            return;
+        }
+
+        // candidate shadows?
+        if (IsParentOrSame(directory, m_entries[i])) {
+            m_entries[i] = m_entries[m_entries.size()-1];
+            m_entries.pop_back();
+            --i;
+        }
+    }
+
+    m_entries << directory;
+}
+
+bool TeamFoundationControl::DirectoryTree::IsParentOrSame(const QString& lsh, const QString& rhs)
+{
+    return rhs.startsWith(lsh, Qt::CaseInsensitive);
+}
+
+bool TeamFoundationControl::DirectoryTree::IsTopLevelOrSubDirectory(const QString& directory) const
+{
+    auto* p = &directory;
+    return Utils::contains(m_entries, [p] (const QString& entry) { return IsParentOrSame(entry, *p); });
+}
+
+
