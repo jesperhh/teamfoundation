@@ -68,6 +68,7 @@ private:
         bool IsTopLevelOrSubDirectory(const QString& directory) const;
     private:
         static bool IsParentOrSame(const QString& lhs, const QString& rhs);
+        static QString terminate(const QString& directory);
     private:
         QStringList m_entries;
     };

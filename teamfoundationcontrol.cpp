@@ -253,21 +253,29 @@ Core::ShellCommand *TeamFoundation::Internal::TeamFoundationControl::createIniti
 ////////////////////////////////////////////////////////////////////////////////
 void TeamFoundationControl::DirectoryTree::Add(const QString& directory)
 {
+    QString dir = terminate(directory);
+
     for (int i = 0; i < m_entries.size(); ++i) {
         // candidate shadowed?
-        if (IsParentOrSame(m_entries[i], directory)) {
+        if (IsParentOrSame(m_entries[i], dir))
             return;
-        }
 
         // candidate shadows?
-        if (IsParentOrSame(directory, m_entries[i])) {
+        if (IsParentOrSame(dir, m_entries[i])) {
             m_entries[i] = m_entries[m_entries.size()-1];
             m_entries.pop_back();
             --i;
         }
     }
 
-    m_entries << directory;
+    m_entries << dir;
+}
+
+QString TeamFoundationControl::DirectoryTree::terminate(const QString& directory)
+{
+    if (!directory.endsWith(QDir::separator()))
+        return directory + QDir::separator();
+    return directory;
 }
 
 bool TeamFoundationControl::DirectoryTree::IsParentOrSame(const QString& lsh, const QString& rhs)
@@ -277,7 +285,8 @@ bool TeamFoundationControl::DirectoryTree::IsParentOrSame(const QString& lsh, co
 
 bool TeamFoundationControl::DirectoryTree::IsTopLevelOrSubDirectory(const QString& directory) const
 {
-    auto* p = &directory;
+    QString dir = terminate(directory);
+    auto* p = &dir;
     return Utils::contains(m_entries, [p] (const QString& entry) { return IsParentOrSame(entry, *p); });
 }
 
