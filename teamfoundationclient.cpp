@@ -408,9 +408,8 @@ void TeamFoundationClient::addRecursive(QStringList &arguments, const QString &p
 
 void TeamFoundationClient::configurationChanged()
 {
-    if (m_plugin->settings().binaryPath().isEmpty()) {
-        m_tfVersion = TfVersion_None;
-    } else {
+    m_tfVersion = TfVersion_None;
+    if (!m_plugin->settings().binaryPath().isEmpty()) {
         TeamFoundationResponse response = runTf(QStringLiteral("C:/"), QStringList(), SuppressCompletely);
         QRegularExpression re(QStringLiteral("Version (\\d+)"));
         QRegularExpressionMatch match = re.match(response.standardOut);
