@@ -273,8 +273,10 @@ void TeamFoundationControl::DirectoryTree::Add(const QString& directory)
 
 QString TeamFoundationControl::DirectoryTree::terminate(const QString& directory)
 {
-    if (!directory.endsWith(QDir::separator()))
-        return directory + QDir::separator();
+    // QDir::separator() returns '\\' on Windows
+    // which is not what we want
+    if (!directory.endsWith(QLatin1Char('/')))
+        return directory + QLatin1Char('/');
     return directory;
 }
 
