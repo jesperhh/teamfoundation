@@ -2,17 +2,17 @@
 **
 ** Team Foundation Server plugin for Qt Creator
 ** Copyright (C) 2014 Jesper Hellesø Hansen
-** 
+**
 ** This library is free software; you can redistribute it and/or
 ** modify it under the terms of the GNU Lesser General Public
 ** License as published by the Free Software Foundation; either
 ** version 2.1 of the License, or (at your option) any later version.
-** 
+**
 ** This library is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ** Lesser General Public License for more details.
-** 
+**
 ** You should have received a copy of the GNU Lesser General Public
 ** License along with this library; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -42,6 +42,7 @@ class TeamFoundationClient: public QObject
 {
     Q_OBJECT
 
+    friend class TeamFoundationPlugin;
 public:
     explicit TeamFoundationClient(TeamFoundationPlugin *plugin);
 
@@ -56,7 +57,7 @@ public:
     bool getLatest(const QString &path) const;
     bool history(const QString &path) const;
 
-    bool managesFile(const QString &fileName) const;    
+    bool managesFile(const QString &fileName) const;
     bool managesDirectory(const QString &directory) const;
     QString repositoryUrl(const QString &fileName) const;
 
@@ -80,6 +81,9 @@ private slots:
     void compareProject();
     void checkInProject();
 
+    // settings
+    void configurationChanged();
+
 private:
     TeamFoundationResponse runTf(const QString &workingDirectory, const QStringList &arguments,
                                  unsigned flags = VcsBase::VcsCommand::ShowStdOut) const;
@@ -88,13 +92,24 @@ private:
     TeamFoundationResponse runVcs(const QString &workingDirectory,	const Utils::FileName &executable,
                                   const QStringList &arguments, unsigned flags) const;
 
+    bool manages(const QString &directory, const QString& command) const;
+    QString repositoryUrl(const QString &fileName, const QString& command) const;
+
     static QString getRepositoryUrl(const QString &workspaceInfo);
     /// Adds /recursive to the paramter list if path is a directory
     void addRecursive(QStringList &arguments, const QString &path) const;
 
     TeamFoundationPlugin* m_plugin;
 
-    friend class TeamFoundationPlugin;
+    enum TfVersion
+    {
+        TfVersion_None,
+        TfVersion_10,
+        TfVersion_BetterThan10
+    };
+
+    TfVersion m_tfVersion = TfVersion_None;
+
 };
 
 } // namespace Internal

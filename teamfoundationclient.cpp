@@ -2,17 +2,17 @@
 **
 ** Team Foundation Server plugin for Qt Creator
 ** Copyright (C) 2014 Jesper Hellesø Hansen
-** 
+**
 ** This library is free software; you can redistribute it and/or
 ** modify it under the terms of the GNU Lesser General Public
 ** License as published by the Free Software Foundation; either
 ** version 2.1 of the License, or (at your option) any later version.
-** 
+**
 ** This library is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ** Lesser General Public License for more details.
-** 
+**
 ** You should have received a copy of the GNU Lesser General Public
 ** License along with this library; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -24,8 +24,10 @@
 
 #include <coreplugin/iversioncontrol.h>
 #include <utils/synchronousprocess.h>
-#include <QFileInfo>
 #include <utils/qtcassert.h>
+#include <QFileInfo>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 
 #define RUN_PREAMBLE_1(file) \
     const QFileInfo file##Info(file); \
@@ -46,6 +48,9 @@ const int SuppressCompletely =
 TeamFoundationClient::TeamFoundationClient(TeamFoundationPlugin *plugin) : QObject(plugin),
     m_plugin(plugin)
 {
+    connect(plugin->versionControl(), SIGNAL(configurationChanged()), this, SLOT(configurationChanged()));
+
+    configurationChanged();
 }
 
 bool TeamFoundationClient::addFile(const QString &fileName) const
@@ -184,30 +189,48 @@ bool TeamFoundationClient::history(const QString &path) const
 
 bool TeamFoundationClient::managesFile(const QString &fileName) const
 {
-    RUN_PREAMBLE_1(fileName)
-
-    parameters << QLatin1String("info");
-    parameters << fileName;
-
-    using namespace VcsBase;
-    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters, SuppressCompletely);
-    return !resp.error;
+    switch (m_tfVersion) {
+    case TfVersion_10:
+        return manages(fileName, QStringLiteral("properties"));
+    default:
+        return manages(fileName, QStringLiteral("info"));
+    }
 }
 
 bool TeamFoundationClient::managesDirectory(const QString &directory) const
 {
-    QStringList parameters;
-    parameters << QLatin1String("info");
-    parameters << directory;
+    switch (m_tfVersion) {
+    case TfVersion_10:
+        return manages(directory, QStringLiteral("properties"));
+    default:
+        return manages(directory, QStringLiteral("info"));
+    }
+}
 
-    const TeamFoundationResponse resp = runTf(directory, parameters, SuppressCompletely);
+bool TeamFoundationClient::manages(const QString &path, const QString& cmd) const
+{
+    QStringList parameters;
+    parameters << cmd;
+    parameters << path;
+
+    const TeamFoundationResponse resp = runTf(path, parameters, SuppressCompletely);
     return !resp.error;
 }
 
 QString TeamFoundationClient::repositoryUrl(const QString &fileName) const
 {
+    switch (m_tfVersion) {
+    case TfVersion_10:
+        return repositoryUrl(fileName, QStringLiteral("properties"));
+    default:
+        return repositoryUrl(fileName, QStringLiteral("info"));
+    }
+}
+
+QString TeamFoundationClient::repositoryUrl(const QString &fileName, const QString& command) const
+{
     RUN_PREAMBLE_1(fileName)
-    parameters << QLatin1String("info");
+    parameters << command;
     parameters << fileName;
 
     const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters, SuppressCompletely);
@@ -381,4 +404,26 @@ void TeamFoundationClient::addRecursive(QStringList &arguments, const QString &p
     QFileInfo fileInfo(path);
     if (fileInfo.isDir())
         arguments << QLatin1String("/recursive");
+}
+
+void TeamFoundationClient::configurationChanged()
+{
+    m_tfVersion = TfVersion_None;
+    if (!m_plugin->settings().binaryPath().isEmpty()) {
+        TeamFoundationResponse response = runTf(QStringLiteral("C:/"), QStringList(), SuppressCompletely);
+        QRegularExpression re(QStringLiteral("Version (\\d+)"));
+        QRegularExpressionMatch match = re.match(response.standardOut);
+        if (match.hasMatch()) {
+            QString str = match.captured(1);
+            int version = str.toInt();
+            switch (version) {
+            case 10:
+                m_tfVersion = TfVersion_10;
+                break;
+            default:
+                m_tfVersion = TfVersion_BetterThan10;
+                break;
+            }
+        }
+    }
 }
