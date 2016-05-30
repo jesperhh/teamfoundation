@@ -34,7 +34,6 @@ class TeamFoundationControl : public Core::IVersionControl
 {
     Q_OBJECT
 public:
-    virtual ~TeamFoundationControl();
     explicit TeamFoundationControl(TeamFoundationPlugin *plugin);
     virtual QString displayName() const override;
     virtual Core::Id id() const override;

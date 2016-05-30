@@ -32,14 +32,6 @@
 using namespace TeamFoundation;
 using namespace TeamFoundation::Internal;
 
-#include "teamfoundationcontrol.moc"
-
-
-TeamFoundationControl::~TeamFoundationControl()
-{
-
-}
-
 TeamFoundationControl::TeamFoundationControl(TeamFoundationPlugin *plugin) :
     m_plugin(plugin)
 { }
