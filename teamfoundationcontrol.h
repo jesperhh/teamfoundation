@@ -34,9 +34,10 @@ class TeamFoundationControl : public Core::IVersionControl
 {
     Q_OBJECT
 public:
+    virtual ~TeamFoundationControl();
     explicit TeamFoundationControl(TeamFoundationPlugin *plugin);
-    QString displayName() const;
-    Core::Id id() const;
+    virtual QString displayName() const override;
+    virtual Core::Id id() const override;
 
     virtual bool managesDirectory(const QString &directory, QString *topLevel = 0) const override;
     virtual bool managesFile(const QString &workingDirectory, const QString &fileName) const override;
