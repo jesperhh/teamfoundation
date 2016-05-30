@@ -32,6 +32,7 @@
 using namespace TeamFoundation;
 using namespace TeamFoundation::Internal;
 
+
 TeamFoundationControl::TeamFoundationControl(TeamFoundationPlugin *plugin) :
     m_plugin(plugin)
 { }
@@ -275,5 +276,3 @@ bool TeamFoundationControl::DirectoryTree::IsTopLevelOrSubDirectory(const QStrin
     auto* p = &dir;
     return Utils::contains(m_entries, [p] (const QString& entry) { return IsParentOrSame(entry, *p); });
 }
-
-
