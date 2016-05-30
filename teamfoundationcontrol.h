@@ -35,23 +35,23 @@ class TeamFoundationControl : public Core::IVersionControl
     Q_OBJECT
 public:
     explicit TeamFoundationControl(TeamFoundationPlugin *plugin);
-    QString displayName() const;
-    Core::Id id() const;
+    virtual QString displayName() const override;
+    virtual Core::Id id() const override;
 
-    bool managesDirectory(const QString &directory, QString *topLevel = 0) const;
-    bool managesFile(const QString &workingDirectory, const QString &fileName) const;
-    bool isConfigured() const;
-    bool supportsOperation(Operation operation) const;
-    OpenSupportMode openSupportMode(const QString &fileName) const;
-    bool vcsOpen(const QString &fileName);
-    bool vcsAdd(const QString &fileName);
-    bool vcsDelete(const QString &filename);
-    bool vcsMove(const QString &from, const QString &to);
-    bool vcsCreateRepository(const QString &directory);
+    virtual bool managesDirectory(const QString &directory, QString *topLevel = 0) const override;
+    virtual bool managesFile(const QString &workingDirectory, const QString &fileName) const override;
+    virtual bool isConfigured() const  override;
+    virtual bool supportsOperation(Operation operation) const  override;
+    virtual OpenSupportMode openSupportMode(const QString &fileName) const  override;
+    virtual bool vcsOpen(const QString &fileName)  override;
+    virtual bool vcsAdd(const QString &fileName) override;
+    virtual bool vcsDelete(const QString &filename) override;
+    virtual bool vcsMove(const QString &from, const QString &to) override;
+    virtual bool vcsCreateRepository(const QString &directory) override;
     bool vcsCheckout(const QString &directory, const QByteArray &url);
     QString vcsGetRepositoryURL(const QString &directory);
-    bool vcsAnnotate(const QString &file, int line);
-    Core::ShellCommand *createInitialCheckoutCommand(const QString &url, const Utils::FileName &baseDirectory, const QString &localName, const QStringList &extraArgs);
+    virtual bool vcsAnnotate(const QString &file, int line) override;
+    virtual Core::ShellCommand *createInitialCheckoutCommand(const QString &url, const Utils::FileName &baseDirectory, const QString &localName, const QStringList &extraArgs)  override;
 
     void emitFilesChanged(const QStringList &files);
     void emitRepositoryChanged(const QString &repository);

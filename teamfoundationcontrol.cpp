@@ -32,22 +32,6 @@
 using namespace TeamFoundation;
 using namespace TeamFoundation::Internal;
 
-class IgnoreExitCodeInterpreter : public Utils::ExitCodeInterpreter
-{
-    Q_OBJECT
-public:
-    IgnoreExitCodeInterpreter(QObject *parent) : Utils::ExitCodeInterpreter(parent) {}
-    Utils::SynchronousProcessResponse::Result interpretExitCode(int /*code*/) const
-    {
-        return Utils::SynchronousProcessResponse::Finished;
-    }
-};
-
-#include "teamfoundationcontrol.moc"
-
-
-
-
 TeamFoundationControl::TeamFoundationControl(TeamFoundationPlugin *plugin) :
     m_plugin(plugin)
 { }
