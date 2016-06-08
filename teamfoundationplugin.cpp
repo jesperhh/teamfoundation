@@ -2,17 +2,17 @@
 **
 ** Team Foundation Server plugin for Qt Creator
 ** Copyright (C) 2014 Jesper Hellesø Hansen
-** 
+**
 ** This library is free software; you can redistribute it and/or
 ** modify it under the terms of the GNU Lesser General Public
 ** License as published by the Free Software Foundation; either
 ** version 2.1 of the License, or (at your option) any later version.
-** 
+**
 ** This library is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ** Lesser General Public License for more details.
-** 
+**
 ** You should have received a copy of the GNU Lesser General Public
 ** License along with this library; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -115,19 +115,19 @@ void TeamFoundationPlugin::createMenus(const Core::Context &context)
 
     container->addSeparator(context);
 
-    action = createRepositoryAction(container, context, tr("History (Repository)"), "TeamFoundation.HistoryProject");
+    action = createRepositoryAction(container, context, tr("History (Project)"), "TeamFoundation.HistoryProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(historyProject()));
 
-    action = createRepositoryAction(container, context, tr("Get latest (Repository)"), "TeamFoundation.GetLatestProject");
+    action = createRepositoryAction(container, context, tr("Get latest (Project)"), "TeamFoundation.GetLatestProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(getLatestProject()));
 
-    action = createRepositoryAction(container, context, tr("Undo (Repository)"), "TeamFoundation.UndoProject");
+    action = createRepositoryAction(container, context, tr("Undo (Project)"), "TeamFoundation.UndoProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(undoProject()));
 
-    action = createRepositoryAction(container, context, tr("Compare (Repository)"), "TeamFoundation.CompareProject");
+    action = createRepositoryAction(container, context, tr("Compare (Project)"), "TeamFoundation.CompareProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(compareProject()));
 
-    action = createRepositoryAction(container, context, tr("Check in (Repository)"), "TeamFoundation.CheckInProject");
+    action = createRepositoryAction(container, context, tr("Check in (Project)"), "TeamFoundation.CheckInProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(checkInProject()));
 
     Core::ActionContainer *toolsMenu = Core::ActionManager::actionContainer(Core::Id(Core::Constants::M_TOOLS));

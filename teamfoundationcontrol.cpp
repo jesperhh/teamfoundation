@@ -1,7 +1,7 @@
 /****************************************************************************
 **
 ** Team Foundation Server plugin for Qt Creator
-** Copyright (C) 2014 Jesper Hellesø Hansen
+** Copyright (C) 2014 Jesper Hellesø¸ Hansen
 **
 ** This library is free software; you can redistribute it and/or
 ** modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,10 @@
 #include "teamfoundationplugin.h"
 #include "teamfoundationclient.h"
 #include "teamfoundationconstants.h"
+
+#include <projectexplorer/session.h>
+#include <projectexplorer/project.h>
+#include <projectexplorer/projecttree.h>
 
 #include <QDir>
 #include <utils/synchronousprocess.h>
@@ -106,14 +110,8 @@ bool TeamFoundationControl::managesDirectory(const QString &directory, QString *
     if (!isManaged)
         return false;
 
-    QDir dir(directory);
-    while (true)
-    {
-        QTC_ASSERT(topLevel, return true);
-        *topLevel = dir.absolutePath();
-        if (!dir.cdUp() || !managesDirectoryEx(dir.absolutePath()))
-            break;
-    }
+    QTC_ASSERT(topLevel, return true);
+    *topLevel = directory;
 
     return true;
 }
