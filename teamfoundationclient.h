@@ -32,8 +32,9 @@ class TeamFoundationPlugin;
 
 struct TeamFoundationResponse
 {
-    TeamFoundationResponse() : error(false) {}
-    bool error;
+    TeamFoundationResponse() : exitCode(0) {}
+    bool error() const { return exitCode != 0; }
+    int exitCode;
     QString standardOut;
     QString standardError;
 };

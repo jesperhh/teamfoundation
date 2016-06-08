@@ -2,17 +2,17 @@
 **
 ** Team Foundation Server plugin for Qt Creator
 ** Copyright (C) 2014 Jesper Hellesø Hansen
-** 
+**
 ** This library is free software; you can redistribute it and/or
 ** modify it under the terms of the GNU Lesser General Public
 ** License as published by the Free Software Foundation; either
 ** version 2.1 of the License, or (at your option) any later version.
-** 
+**
 ** This library is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ** Lesser General Public License for more details.
-** 
+**
 ** You should have received a copy of the GNU Lesser General Public
 ** License along with this library; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -44,6 +44,7 @@ TeamFoundationSettings SettingsPageWidget::settings() const
     rc.setValue(TeamFoundationSettings::userNameKey, m_ui.usernameLineEdit->text());
     rc.setValue(TeamFoundationSettings::passwordKey, m_ui.passwordLineEdit->text());
     rc.setValue(TeamFoundationSettings::timeoutKey, m_ui.timeOutSpinBox->value());
+    rc.setValue(TeamFoundationSettings::revertUnchangedFilesBeforeCheckinKey, m_ui.revertUnchangedFilesBeforeCheckin->isChecked());
     return rc;
 }
 
@@ -54,6 +55,7 @@ void SettingsPageWidget::setSettings(const TeamFoundationSettings &s)
     m_ui.usernameLineEdit->setText(s.stringValue(TeamFoundationSettings::userNameKey));
     m_ui.passwordLineEdit->setText(s.stringValue(TeamFoundationSettings::passwordKey));
     m_ui.timeOutSpinBox->setValue(s.intValue(TeamFoundationSettings::timeoutKey));
+    m_ui.revertUnchangedFilesBeforeCheckin->setChecked(s.boolValue(TeamFoundationSettings::revertUnchangedFilesBeforeCheckinKey));
 }
 
 SettingsPage::SettingsPage() :

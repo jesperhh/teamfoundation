@@ -26,6 +26,7 @@
 #include <utils/synchronousprocess.h>
 #include <utils/qtcassert.h>
 #include <QFileInfo>
+#include <QDir>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 
@@ -58,19 +59,19 @@ bool TeamFoundationClient::addFile(const QString &fileName) const
     RUN_PREAMBLE_1(fileName)
 
     parameters << QLatin1String("add");
-    parameters << fileName;
-    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters);
-    return !resp.error;
+    parameters << QDir::toNativeSeparators(fileName);
+    const TeamFoundationResponse resp = runTf(QDir::current().path(), parameters);
+    return !resp.error();
 }
 
 bool TeamFoundationClient::deleteFile(const QString &fileName) const
 {
     RUN_PREAMBLE_1(fileName)
     parameters << QLatin1String("delete");
-    parameters << fileName;
+    parameters << QDir::toNativeSeparators(fileName);
 
-    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters);
-    return !resp.error;
+    const TeamFoundationResponse resp = runTf(QDir::current().path(), parameters);
+    return !resp.error();
 }
 
 bool TeamFoundationClient::moveFile(const QString &from, const QString &to) const
@@ -78,12 +79,12 @@ bool TeamFoundationClient::moveFile(const QString &from, const QString &to) cons
     RUN_PREAMBLE_2(from, to)
 
     parameters << QLatin1String("rename");
-    parameters << fromInfo.absoluteFilePath();
-    parameters << toInfo.absoluteFilePath();
+    parameters << QDir::toNativeSeparators(fromInfo.absoluteFilePath());
+    parameters << QDir::toNativeSeparators(toInfo.absoluteFilePath());
 
-    const TeamFoundationResponse resp = runTf(fromInfo.absolutePath(), parameters,
+    const TeamFoundationResponse resp = runTf(QDir::current().path(), parameters,
             VcsCommand::ShowStdOut | VcsCommand::FullySynchronously);
-    return !resp.error;
+    return !resp.error();
 }
 
 bool TeamFoundationClient::compare(const QString &path)
@@ -91,14 +92,14 @@ bool TeamFoundationClient::compare(const QString &path)
     RUN_PREAMBLE_1(path)
 
     parameters << QLatin1String("difference");
-    parameters << path;
+    parameters << QDir::toNativeSeparators(path);
     parameters << QLatin1String("/format:Visual");
     parameters << QLatin1String("/prompt");
 
     addRecursive(parameters, path);
 
-    const TeamFoundationResponse resp = runTf(pathInfo.absolutePath(), parameters);
-    return !resp.error;
+    const TeamFoundationResponse resp = runTf(QDir::current().path(), parameters);
+    return !resp.error();
 }
 
 bool TeamFoundationClient::undo(const QString &path)
@@ -106,31 +107,51 @@ bool TeamFoundationClient::undo(const QString &path)
     RUN_PREAMBLE_1(path)
 
     parameters << QLatin1String("undo");
-    parameters << path;
+    parameters << QDir::toNativeSeparators(path);
 
     addRecursive(parameters, path);
 
-    const TeamFoundationResponse resp = runTf(pathInfo.absolutePath(), parameters,
+    const TeamFoundationResponse resp = runTf(QDir::current().path(), parameters,
         VcsCommand::ShowStdOut | VcsCommand::FullySynchronously);
-    if (!resp.error)
+    if (!resp.error())
     {
         m_plugin->emitChangedSignal(path);
     }
-    return !resp.error;
+    return !resp.error();
 }
 
 bool TeamFoundationClient::checkIn(const QString &path)
 {
     RUN_PREAMBLE_1(path)
 
+    auto unchangedReverted = false;
+    if (m_plugin->settings().revertUnchangedFilesBeforeCheckin() &&
+        !m_plugin->settings().tftpBinaryPath().isEmpty()) {
+
+        unchangedReverted = true;
+
+        parameters << QLatin1String("uu");
+        parameters << QDir::toNativeSeparators(path);
+        parameters << QLatin1String("/noget");
+        addRecursive(parameters, path);
+
+        runTfpt(QDir::current().path(), parameters, VcsBase::VcsCommand::ShowStdOut);
+
+        parameters.clear();
+    }
+
     parameters << QLatin1String("checkin");
-    parameters << path;
+    parameters << QDir::toNativeSeparators(path);
     parameters << QLatin1String("/prompt");
 
     addRecursive(parameters, path);
 
-    const TeamFoundationResponse resp = runTf(pathInfo.absolutePath(), parameters);
-    return !resp.error;
+    unsigned flags = VcsBase::VcsCommand::ShowStdOut;
+    if (unchangedReverted)
+        flags |= VcsBase::VcsCommand::SuppressFailMessage;
+
+    const TeamFoundationResponse resp = runTf(QDir::current().path(), parameters, flags);
+    return !resp.error() || (unchangedReverted && resp.exitCode != 100 /* exit code if there where no files to check in */);
 }
 
 bool TeamFoundationClient::checkoutFile(const QString &fileName) const
@@ -138,10 +159,10 @@ bool TeamFoundationClient::checkoutFile(const QString &fileName) const
     RUN_PREAMBLE_1(fileName)
 
     parameters << QLatin1String("checkout");
-    parameters << fileName;
+    parameters << QDir::toNativeSeparators(fileName);
 
-    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters);
-    return !resp.error;
+    const TeamFoundationResponse resp = runTf(QDir::current().path(), parameters);
+    return !resp.error();
 }
 
 bool TeamFoundationClient::annotateFile(const QString &fileName) const
@@ -149,10 +170,10 @@ bool TeamFoundationClient::annotateFile(const QString &fileName) const
     RUN_PREAMBLE_1(fileName)
 
     parameters << QLatin1String("annotate");
-    parameters << fileName;
+    parameters << QDir::toNativeSeparators(fileName);
 
-    const TeamFoundationResponse resp = runTfpt(fileNameInfo.absolutePath(), parameters);
-    return !resp.error;
+    const TeamFoundationResponse resp = runTfpt(QDir::current().path(), parameters);
+    return !resp.error();
 }
 
 bool TeamFoundationClient::getLatest(const QString &path, bool force) const
@@ -160,7 +181,7 @@ bool TeamFoundationClient::getLatest(const QString &path, bool force) const
     RUN_PREAMBLE_1(path)
 
     parameters << QLatin1String("get");
-    parameters << path;
+    parameters << QDir::toNativeSeparators(path);
     parameters << QLatin1String("/prompt");
 
     if (force)
@@ -168,11 +189,11 @@ bool TeamFoundationClient::getLatest(const QString &path, bool force) const
 
     addRecursive(parameters, path);
 
-    const TeamFoundationResponse resp = runTf(pathInfo.absolutePath(), parameters);
-    if (!resp.error)
+    const TeamFoundationResponse resp = runTf(QDir::current().path(), parameters);
+    if (!resp.error())
         m_plugin->emitChangedSignal(path);
 
-    return !resp.error;
+    return !resp.error();
 }
 
 bool TeamFoundationClient::history(const QString &path) const
@@ -180,13 +201,13 @@ bool TeamFoundationClient::history(const QString &path) const
     RUN_PREAMBLE_1(path)
 
     parameters << QLatin1String("history");
-    parameters << path;
+    parameters << QDir::toNativeSeparators(path);
     parameters << QLatin1String("/prompt");
 
     addRecursive(parameters, path);
 
-    const TeamFoundationResponse resp = runTf(pathInfo.absolutePath(), parameters);
-    return !resp.error;
+    const TeamFoundationResponse resp = runTf(QDir::current().path(), parameters);
+    return !resp.error();
 }
 
 bool TeamFoundationClient::managesFile(const QString &fileName) const
@@ -213,10 +234,10 @@ bool TeamFoundationClient::manages(const QString &path, const QString& cmd) cons
 {
     QStringList parameters;
     parameters << cmd;
-    parameters << path;
+    parameters << QDir::toNativeSeparators(path);
 
-    const TeamFoundationResponse resp = runTf(path, parameters, SuppressCompletely);
-    return !resp.error;
+    const TeamFoundationResponse resp = runTf(QDir::current().path(), parameters, SuppressCompletely);
+    return !resp.error();
 }
 
 QString TeamFoundationClient::repositoryUrl(const QString &fileName) const
@@ -233,10 +254,10 @@ QString TeamFoundationClient::repositoryUrl(const QString &fileName, const QStri
 {
     RUN_PREAMBLE_1(fileName)
     parameters << command;
-    parameters << fileName;
+    parameters << QDir::toNativeSeparators(fileName);
 
-    const TeamFoundationResponse resp = runTf(fileNameInfo.absolutePath(), parameters, SuppressCompletely);
-    if (resp.error || resp.standardOut.isNull() || resp.standardOut.isEmpty())
+    const TeamFoundationResponse resp = runTf(QDir::current().path(), parameters, SuppressCompletely);
+    if (resp.error() || resp.standardOut.isNull() || resp.standardOut.isEmpty())
         return QString();
 
     return getRepositoryUrl(resp.standardOut);
@@ -383,7 +404,7 @@ TeamFoundationResponse TeamFoundationClient::runVcs(
     TeamFoundationResponse response;
     if (!m_plugin->versionControl()->isConfigured())
     {
-        response.error = true;
+        response.exitCode = -1;
         return response;
     }
 
@@ -397,7 +418,7 @@ TeamFoundationResponse TeamFoundationClient::runVcs(
                              m_plugin->settings().timeOut(),
                              flags);
 
-    response.error = runVcsResponse.result != Utils::SynchronousProcessResponse::Finished;
+    response.exitCode = runVcsResponse.exitCode;
     response.standardError = runVcsResponse.stdErr;
     response.standardOut = runVcsResponse.stdOut;
     return response;
@@ -426,7 +447,7 @@ void TeamFoundationClient::configurationChanged()
 {
     m_tfVersion = TfVersion_None;
     if (!m_plugin->settings().binaryPath().isEmpty()) {
-        TeamFoundationResponse response = runTf(QLatin1String("C:/"), QStringList(), SuppressCompletely);
+        TeamFoundationResponse response = runTf(QDir::current().path(), QStringList(), SuppressCompletely);
         QRegularExpression re(QLatin1String("Version (\\d+)"));
         QRegularExpressionMatch match = re.match(response.standardOut);
         if (match.hasMatch()) {
