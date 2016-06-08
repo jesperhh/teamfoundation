@@ -54,7 +54,7 @@ public:
     bool checkIn(const QString &path);
     bool checkoutFile(const QString &fileName) const;
     bool annotateFile(const QString &fileName) const;
-    bool getLatest(const QString &path) const;
+    bool getLatest(const QString &path, bool force) const;
     bool history(const QString &path) const;
 
     bool managesFile(const QString &fileName) const;
@@ -72,11 +72,13 @@ private slots:
     void checkInCurrentFile();
     void annotateCurrentFile();
     void getLatestCurrentFile();
+    void forceGetLatestCurrentFile();
     void historyCurrentFile();
 
     // Project level command slots
     void historyProject();
     void getLatestProject();
+    void forceGetLatestProject();
     void undoProject();
     void compareProject();
     void checkInProject();

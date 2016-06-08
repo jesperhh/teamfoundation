@@ -155,7 +155,7 @@ bool TeamFoundationClient::annotateFile(const QString &fileName) const
     return !resp.error;
 }
 
-bool TeamFoundationClient::getLatest(const QString &path) const
+bool TeamFoundationClient::getLatest(const QString &path, bool force) const
 {
     RUN_PREAMBLE_1(path)
 
@@ -163,13 +163,15 @@ bool TeamFoundationClient::getLatest(const QString &path) const
     parameters << path;
     parameters << QLatin1String("/prompt");
 
+    if (force)
+        parameters << QLatin1String("/force");
+
     addRecursive(parameters, path);
 
     const TeamFoundationResponse resp = runTf(pathInfo.absolutePath(), parameters);
     if (!resp.error)
-    {
         m_plugin->emitChangedSignal(path);
-    }
+
     return !resp.error;
 }
 
@@ -191,9 +193,9 @@ bool TeamFoundationClient::managesFile(const QString &fileName) const
 {
     switch (m_tfVersion) {
     case TfVersion_10:
-        return manages(fileName, QStringLiteral("properties"));
+        return manages(fileName, QLatin1String("properties"));
     default:
-        return manages(fileName, QStringLiteral("info"));
+        return manages(fileName, QLatin1String("info"));
     }
 }
 
@@ -201,9 +203,9 @@ bool TeamFoundationClient::managesDirectory(const QString &directory) const
 {
     switch (m_tfVersion) {
     case TfVersion_10:
-        return manages(directory, QStringLiteral("properties"));
+        return manages(directory, QLatin1String("properties"));
     default:
-        return manages(directory, QStringLiteral("info"));
+        return manages(directory, QLatin1String("info"));
     }
 }
 
@@ -221,9 +223,9 @@ QString TeamFoundationClient::repositoryUrl(const QString &fileName) const
 {
     switch (m_tfVersion) {
     case TfVersion_10:
-        return repositoryUrl(fileName, QStringLiteral("properties"));
+        return repositoryUrl(fileName, QLatin1String("properties"));
     default:
-        return repositoryUrl(fileName, QStringLiteral("info"));
+        return repositoryUrl(fileName, QLatin1String("info"));
     }
 }
 
@@ -299,7 +301,14 @@ void TeamFoundationClient::getLatestCurrentFile()
 {
     QTC_ASSERT(m_plugin->currentState().hasFile(), return);
     const QString filename = m_plugin->currentState().currentFile();
-    getLatest(filename);
+    getLatest(filename, false);
+}
+
+void TeamFoundationClient::forceGetLatestCurrentFile()
+{
+    QTC_ASSERT(m_plugin->currentState().hasFile(), return);
+    const QString filename = m_plugin->currentState().currentFile();
+    getLatest(filename, true);
 }
 
 void TeamFoundationClient::historyCurrentFile()
@@ -320,7 +329,14 @@ void TeamFoundationClient::getLatestProject()
 {
     QTC_ASSERT(m_plugin->currentState().hasTopLevel(), return);
     const QString topLevel = m_plugin->currentState().topLevel();
-    getLatest(topLevel);
+    getLatest(topLevel, false);
+}
+
+void TeamFoundationClient::forceGetLatestProject()
+{
+    QTC_ASSERT(m_plugin->currentState().hasTopLevel(), return);
+    const QString topLevel = m_plugin->currentState().topLevel();
+    getLatest(topLevel, true);
 }
 
 void TeamFoundationClient::undoProject()
@@ -410,8 +426,8 @@ void TeamFoundationClient::configurationChanged()
 {
     m_tfVersion = TfVersion_None;
     if (!m_plugin->settings().binaryPath().isEmpty()) {
-        TeamFoundationResponse response = runTf(QStringLiteral("C:/"), QStringList(), SuppressCompletely);
-        QRegularExpression re(QStringLiteral("Version (\\d+)"));
+        TeamFoundationResponse response = runTf(QLatin1String("C:/"), QStringList(), SuppressCompletely);
+        QRegularExpression re(QLatin1String("Version (\\d+)"));
         QRegularExpressionMatch match = re.match(response.standardOut);
         if (match.hasMatch()) {
             QString str = match.captured(1);

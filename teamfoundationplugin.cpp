@@ -113,6 +113,9 @@ void TeamFoundationPlugin::createMenus(const Core::Context &context)
     action = createFileAction(context, container, tr("Get latest..."), tr("Get latest %1"), "TeamFoundation.GetLatest");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(getLatestCurrentFile()));
 
+    action = createFileAction(context, container, tr("Get latest..."), tr("Force get latest %1"), "TeamFoundation.ForceGetLatest");
+    connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(forceGetLatestCurrentFile()));
+
     container->addSeparator(context);
 
     action = createRepositoryAction(container, context, tr("History (Project)"), "TeamFoundation.HistoryProject");
@@ -120,6 +123,9 @@ void TeamFoundationPlugin::createMenus(const Core::Context &context)
 
     action = createRepositoryAction(container, context, tr("Get latest (Project)"), "TeamFoundation.GetLatestProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(getLatestProject()));
+
+    action = createRepositoryAction(container, context, tr("Force get latest (Project)"), "TeamFoundation.ForceGetLatestProject");
+    connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(forceGetLatestProject()));
 
     action = createRepositoryAction(container, context, tr("Undo (Project)"), "TeamFoundation.UndoProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(undoProject()));
