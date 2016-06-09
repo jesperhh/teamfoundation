@@ -2,6 +2,7 @@
     \"Name\" : \"TeamFoundation\",
     \"Version\" : \"$$QTCREATOR_VERSION\",
     \"CompatVersion\" : \"$$QTCREATOR_COMPAT_VERSION\",
+    \"Platform\" : \"(Windows.*)\",
     \"Vendor\" : \"Jesper Hellesø Hansen\",
     \"Copyright\" : \"(C) 2015 Jesper Hellesø Hansen\",
     \"License\" : [ \"GNU Lesser General Public License 2.1\" ],
