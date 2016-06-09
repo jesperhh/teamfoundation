@@ -381,6 +381,13 @@ void TeamFoundationClient::checkInProject()
     checkIn(topLevel);
 }
 
+void TeamFoundationClient::revertUnchangedProject()
+{
+    QTC_ASSERT(m_plugin->currentState().hasTopLevel(), return);
+    const QString topLevel = m_plugin->currentState().topLevel();
+    revertUnchanged(topLevel);
+}
+
 TeamFoundationResponse TeamFoundationClient::runTf(const QString &workingDirectory,
                                                    const QStringList &arguments,
                                                    unsigned flags) const
@@ -463,4 +470,17 @@ void TeamFoundationClient::configurationChanged()
             }
         }
     }
+}
+
+bool TeamFoundationClient::revertUnchanged(const QString &path)
+{
+    RUN_PREAMBLE_1(path)
+
+    parameters << QLatin1String("uu");
+    parameters << QDir::toNativeSeparators(path);
+    parameters << QLatin1String("/noget");
+    addRecursive(parameters, path);
+
+    const TeamFoundationResponse resp = runTfpt(QDir::current().path(), parameters, VcsBase::VcsCommand::ShowStdOut);
+    return !resp.error() || (resp.exitCode != 100 /* exit code if there where no files to revert */);
 }

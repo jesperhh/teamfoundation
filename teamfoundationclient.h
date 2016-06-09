@@ -61,6 +61,7 @@ public:
     bool managesFile(const QString &fileName) const;
     bool managesDirectory(const QString &directory) const;
     QString repositoryUrl(const QString &fileName) const;
+    bool revertUnchanged(const QString &path);
 
     /// Adds authentication information if it is specified
     static void addAuthentication(QStringList &arguments);
@@ -83,6 +84,7 @@ private slots:
     void undoProject();
     void compareProject();
     void checkInProject();
+    void revertUnchangedProject();
 
     // settings
     void configurationChanged();

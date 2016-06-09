@@ -136,6 +136,9 @@ void TeamFoundationPlugin::createMenus(const Core::Context &context)
     action = createRepositoryAction(container, context, tr("Check in (Project)"), "TeamFoundation.CheckInProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(checkInProject()));
 
+    action = createRepositoryAction(container, context, tr("Undo unchanged (Project)"), "TeamFoundation.UndoUnchanged");
+    connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(revertUnchangedProject()));
+
     Core::ActionContainer *toolsMenu = Core::ActionManager::actionContainer(Core::Id(Core::Constants::M_TOOLS));
     toolsMenu->addMenu(container);
 
