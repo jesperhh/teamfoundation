@@ -24,6 +24,10 @@
 #include "teamfoundationclient.h"
 #include "teamfoundationconstants.h"
 
+#include <projectexplorer/session.h>
+#include <projectexplorer/project.h>
+#include <projectexplorer/projecttree.h>
+
 #include <QDir>
 #include <utils/synchronousprocess.h>
 #include <utils/qtcassert.h>
@@ -31,6 +35,7 @@
 
 using namespace TeamFoundation;
 using namespace TeamFoundation::Internal;
+
 
 TeamFoundationControl::TeamFoundationControl(TeamFoundationPlugin *plugin) :
     m_plugin(plugin)
@@ -105,14 +110,8 @@ bool TeamFoundationControl::managesDirectory(const QString &directory, QString *
     if (!isManaged)
         return false;
 
-    QDir dir(directory);
-    while (true)
-    {
-        QTC_ASSERT(topLevel, return true);
-        *topLevel = dir.absolutePath();
-        if (!dir.cdUp() || !managesDirectoryEx(dir.absolutePath()))
-            break;
-    }
+    QTC_ASSERT(topLevel, return true);
+    *topLevel = directory;
 
     return true;
 }
@@ -275,5 +274,3 @@ bool TeamFoundationControl::DirectoryTree::IsTopLevelOrSubDirectory(const QStrin
     auto* p = &dir;
     return Utils::contains(m_entries, [p] (const QString& entry) { return IsParentOrSame(entry, *p); });
 }
-
-
