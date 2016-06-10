@@ -32,8 +32,9 @@ class TeamFoundationPlugin;
 
 struct TeamFoundationResponse
 {
-    TeamFoundationResponse() : error(false) {}
-    bool error;
+    TeamFoundationResponse() : exitCode(0) {}
+    bool error() const { return exitCode != 0; }
+    int exitCode;
     QString standardOut;
     QString standardError;
 };
@@ -54,12 +55,13 @@ public:
     bool checkIn(const QString &path);
     bool checkoutFile(const QString &fileName) const;
     bool annotateFile(const QString &fileName) const;
-    bool getLatest(const QString &path) const;
+    bool getLatest(const QString &path, bool force) const;
     bool history(const QString &path) const;
 
     bool managesFile(const QString &fileName) const;
     bool managesDirectory(const QString &directory) const;
     QString repositoryUrl(const QString &fileName) const;
+    bool revertUnchanged(const QString &path);
 
     /// Adds authentication information if it is specified
     static void addAuthentication(QStringList &arguments);
@@ -72,14 +74,17 @@ private slots:
     void checkInCurrentFile();
     void annotateCurrentFile();
     void getLatestCurrentFile();
+    void forceGetLatestCurrentFile();
     void historyCurrentFile();
 
     // Project level command slots
     void historyProject();
     void getLatestProject();
+    void forceGetLatestProject();
     void undoProject();
     void compareProject();
     void checkInProject();
+    void revertUnchangedProject();
 
     // settings
     void configurationChanged();
