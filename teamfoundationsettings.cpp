@@ -1,7 +1,7 @@
 /****************************************************************************
 **
 ** Team Foundation Server plugin for Qt Creator
-** Copyright (C) 2014 Jesper Hellesø¸ Hansen
+** Copyright (C) 2014 Jesper Hellesø Hansen
 **
 ** This library is free software; you can redistribute it and/or
 ** modify it under the terms of the GNU Lesser General Public
