@@ -97,8 +97,6 @@ private slots:
     // settings
     void configurationChanged();
 
-
-
 private:
     TeamFoundationResponse runTf(const QString &workingDirectory, const QStringList &arguments,
                                  unsigned flags = VcsBase::VcsCommand::ShowStdOut) const;
