@@ -256,8 +256,6 @@ bool TeamFoundationPlugin::submitEditorAboutToClose()
 
 void TeamFoundationPlugin::updateActions(VcsBase::VcsBasePlugin::ActionState as)
 {
-//    m_commandLocator->setEnabled(true);
-
     foreach (QAction *projectAction, m_projectActions)
         projectAction->setEnabled(as == VcsBase::VcsBasePlugin::VcsEnabled);
 
