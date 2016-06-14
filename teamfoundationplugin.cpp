@@ -55,41 +55,48 @@ TeamFoundationPlugin::~TeamFoundationPlugin()
     // Delete members
 }
 
-QAction* TeamFoundationPlugin::createFileAction(const Core::Context &context, Core::ActionContainer* container,
-                                             const QString &emptyText, const QString &parameterText, const char *actionId)
+QAction* TeamFoundationPlugin::createFileAction(
+        Core::CommandLocator* locator,
+        const Core::Context &context,
+        Core::ActionContainer* container,
+        const QString &emptyText,
+        const QString &parameterText,
+        const char *actionId)
 {
     Utils::ParameterAction *action = new Utils::ParameterAction(
                 emptyText, parameterText, Utils::ParameterAction::EnabledWithParameter, this);
-    m_projectActions.append(action);
     Core::Command *command = Core::ActionManager::registerAction(action, actionId, context);
     command->setAttribute(Core::Command::CA_UpdateText);
     container->addAction(command);
-    m_commandLocator->appendCommand(command);
+    locator->appendCommand(command);
     m_fileActions.append(action);
     return (action);
 }
 
 QAction* TeamFoundationPlugin::createProjectAction(
+        Core::CommandLocator* locator,
         Core::ActionContainer* container,
         Core::Context context,
         const QString &actionText,
         const char *actionId)
 {
     QAction *action = new QAction(actionText, this);
+    m_projectActions.append(action);
     Core::Command *command = Core::ActionManager::registerAction(action, actionId, context);
-    m_commandLocator->appendCommand(command);
+    locator->appendCommand(command);
     container->addAction(command);
     return action;
 }
 
 QAction* TeamFoundationPlugin::createGlobalAction(
+        Core::CommandLocator* locator,
         Core::ActionContainer* container,
         const QString &actionText,
         const char *actionId)
 {
     QAction *action = new QAction(actionText, this);
     Core::Command *command = Core::ActionManager::registerAction(action, actionId);
-    m_commandLocator->appendCommand(command);
+    locator->appendCommand(command);
     container->addAction(command);
     return action;
 }
@@ -99,70 +106,70 @@ void TeamFoundationPlugin::createMenus(const Core::Context &context)
     Core::ActionContainer* container = Core::ActionManager::createMenu(Core::Id(Constants::MENU_ID));
 
     const QString prefix = QLatin1String("tfs");
-    m_commandLocator = new Core::CommandLocator("Team Foundation", prefix, prefix);
-    addAutoReleasedObject(m_commandLocator);
+    Core::CommandLocator* locator = new Core::CommandLocator("Team Foundation", prefix, prefix);
+    addAutoReleasedObject(locator);
 
     Core::ActionContainer *currentFileMenu = Core::ActionManager::createMenu("TeamFoundation.CurrentFileMenu");
     currentFileMenu->menu()->setTitle(tr("Current &File"));
     container->addMenu(currentFileMenu);
 
     QAction* action;
-    action = createFileAction(context, currentFileMenu, tr("Add current file"), tr("Add %1"), "TeamFoundation.Add");
+    action = createFileAction(locator, context, currentFileMenu, tr("Add current file"), tr("Add %1"), "TeamFoundation.Add");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(addCurrentFile()));
 
-    action = createFileAction(context, currentFileMenu, tr("Delete current file"), tr("Delete %1"), "TeamFoundation.Delete");
+    action = createFileAction(locator, context, currentFileMenu, tr("Delete current file"), tr("Delete %1"), "TeamFoundation.Delete");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(deleteCurrentFile()));
 
-    action = createFileAction(context, currentFileMenu, tr("Compare current file"), tr("Compare %1"), "TeamFoundation.Compare");
+    action = createFileAction(locator, context, currentFileMenu, tr("Compare current file"), tr("Compare %1"), "TeamFoundation.Compare");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(compareCurrentFile()));
 
-    action = createFileAction(context, currentFileMenu, tr("Undo current file"), tr("Undo %1"), "TeamFoundation.Undo");
+    action = createFileAction(locator, context, currentFileMenu, tr("Undo current file"), tr("Undo %1"), "TeamFoundation.Undo");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(undoCurrentFile()));
 
-    action = createFileAction(context, currentFileMenu, tr("Check in current file"), tr("Check In %1"), "TeamFoundation.CheckIn");
+    action = createFileAction(locator, context, currentFileMenu, tr("Check in current file"), tr("Check In %1"), "TeamFoundation.CheckIn");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(checkInCurrentFile()));
 
-    action = createFileAction(context, currentFileMenu, tr("Annotate current file"), tr("Annotate %1"), "TeamFoundation.Annotate");
+    action = createFileAction(locator, context, currentFileMenu, tr("Annotate current file"), tr("Annotate %1"), "TeamFoundation.Annotate");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(annotateCurrentFile()));
 
-    action = createFileAction(context, currentFileMenu, tr("History..."), tr("History for %1"), "TeamFoundation.History");
+    action = createFileAction(locator, context, currentFileMenu, tr("History..."), tr("History for %1"), "TeamFoundation.History");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(historyCurrentFile()));
 
-    action = createFileAction(context, currentFileMenu, tr("Get latest..."), tr("Get latest %1"), "TeamFoundation.GetLatest");
+    action = createFileAction(locator, context, currentFileMenu, tr("Get latest..."), tr("Get latest %1"), "TeamFoundation.GetLatest");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(getLatestCurrentFile()));
 
-    action = createFileAction(context, currentFileMenu, tr("Force get latest..."), tr("Force get latest %1"), "TeamFoundation.ForceGetLatest");
+    action = createFileAction(locator, context, currentFileMenu, tr("Force get latest..."), tr("Force get latest %1"), "TeamFoundation.ForceGetLatest");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(forceGetLatestCurrentFile()));
 
-    action = createFileAction(context, currentFileMenu, tr("Shelve..."), tr("Shelve %1"), "TeamFoundation.Shelve");
+    action = createFileAction(locator, context, currentFileMenu, tr("Shelve..."), tr("Shelve %1"), "TeamFoundation.Shelve");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(shelveCurrentFile()));
 
     Core::ActionContainer *currentProjectMenu = Core::ActionManager::createMenu("TeamFoundation.CurrentProjectMenu");
     currentProjectMenu->menu()->setTitle(tr("Current &Project"));
     container->addMenu(currentProjectMenu);
 
-    action = createProjectAction(currentProjectMenu, context, tr("History (Project)"), "TeamFoundation.HistoryProject");
+    action = createProjectAction(locator, currentProjectMenu, context, tr("History (Project)"), "TeamFoundation.HistoryProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(historyProject()));
 
-    action = createProjectAction(currentProjectMenu, context, tr("Get latest (Project)"), "TeamFoundation.GetLatestProject");
+    action = createProjectAction(locator, currentProjectMenu, context, tr("Get latest (Project)"), "TeamFoundation.GetLatestProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(getLatestProject()));
 
-    action = createProjectAction(currentProjectMenu, context, tr("Force get latest (Project)"), "TeamFoundation.ForceGetLatestProject");
+    action = createProjectAction(locator, currentProjectMenu, context, tr("Force get latest (Project)"), "TeamFoundation.ForceGetLatestProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(forceGetLatestProject()));
 
-    action = createProjectAction(currentProjectMenu, context, tr("Undo (Project)"), "TeamFoundation.UndoProject");
+    action = createProjectAction(locator, currentProjectMenu, context, tr("Undo (Project)"), "TeamFoundation.UndoProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(undoProject()));
 
-    action = createProjectAction(currentProjectMenu, context, tr("Compare (Project)"), "TeamFoundation.CompareProject");
+    action = createProjectAction(locator, currentProjectMenu, context, tr("Compare (Project)"), "TeamFoundation.CompareProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(compareProject()));
 
-    action = createProjectAction(currentProjectMenu, context, tr("Check in (Project)"), "TeamFoundation.CheckInProject");
+    action = createProjectAction(locator, currentProjectMenu, context, tr("Check in (Project)"), "TeamFoundation.CheckInProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(checkInProject()));
 
-    action = createProjectAction(currentProjectMenu, context, tr("Undo unchanged (Project)"), "TeamFoundation.UndoUnchangedProject");
+    action = createProjectAction(locator, currentProjectMenu, context, tr("Undo unchanged (Project)"), "TeamFoundation.UndoUnchangedProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(revertUnchangedProject()));
 
-    action = createProjectAction(currentProjectMenu, context, tr("Shelve (Project)"), "TeamFoundation.ShelveProject");
+    action = createProjectAction(locator, currentProjectMenu, context, tr("Shelve (Project)"), "TeamFoundation.ShelveProject");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(shelveProject()));
 
     Core::ActionContainer *respositoryMenu = Core::ActionManager::createMenu("TeamFoundation.RepositoryMenu");
@@ -170,10 +177,10 @@ void TeamFoundationPlugin::createMenus(const Core::Context &context)
     container->addMenu(respositoryMenu);
 
 
-    action = createGlobalAction(respositoryMenu, tr("Shelve (Repository)"), "TeamFoundation.ShelveRepository");
+    action = createGlobalAction(locator, respositoryMenu, tr("Shelve (Repository)"), "TeamFoundation.ShelveRepository");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(shelveRepository()));
 
-    action = createGlobalAction(respositoryMenu, tr("Unshelve (Repository)"), "TeamFoundation.UnshelveRepository");
+    action = createGlobalAction(locator, respositoryMenu, tr("Unshelve (Repository)"), "TeamFoundation.UnshelveRepository");
     connect(action, SIGNAL(triggered()), m_teamFoundationClient, SLOT(unshelveRepository()));
 
     Core::ActionContainer *toolsMenu = Core::ActionManager::actionContainer(Core::Id(Core::Constants::M_TOOLS));
