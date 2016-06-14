@@ -2,17 +2,17 @@
 **
 ** Team Foundation Server plugin for Qt Creator
 ** Copyright (C) 2014 Jesper Hellesø Hansen
-** 
+**
 ** This library is free software; you can redistribute it and/or
 ** modify it under the terms of the GNU Lesser General Public
 ** License as published by the Free Software Foundation; either
 ** version 2.1 of the License, or (at your option) any later version.
-** 
+**
 ** This library is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ** Lesser General Public License for more details.
-** 
+**
 ** You should have received a copy of the GNU Lesser General Public
 ** License along with this library; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -76,19 +76,32 @@ private slots:
 
 protected:
     void createMenus(const Core::Context &context);
-    QAction *createFileAction(const Core::Context &context, Core::ActionContainer* container,
-                                     const QString &emptyText, const QString &parameterText, const char *actionId);
-    QAction *createRepositoryAction(Core::ActionContainer* container, Core::Context context,
-                                   const QString &actionText, const char *actionId);
+    QAction *createFileAction(
+            Core::CommandLocator* locator,
+            const Core::Context &context,
+            Core::ActionContainer* container,
+            const QString &emptyText,
+            const QString &parameterText,
+            const char *actionId);
+    QAction *createProjectAction(
+            Core::CommandLocator* locator,
+            Core::ActionContainer* container,
+            Core::Context context,
+            const QString &actionText,
+            const char *actionId);
+    QAction *createGlobalAction(
+            Core::CommandLocator* locator,
+            Core::ActionContainer* container,
+            const QString &actionText,
+            const char *actionId);
     void updateActions(VcsBase::VcsBasePlugin::ActionState);
     bool submitEditorAboutToClose();
 
 private:
     TeamFoundationSettings m_settings;
-    Core::CommandLocator *m_commandLocator;
     QAction *m_menuAction;
-    QList<Utils::ParameterAction*> m_fileActionList;
-    QList<QAction*> m_projectActionList;
+    QList<Utils::ParameterAction*> m_fileActions;
+    QList<QAction*> m_projectActions;
     TeamFoundationClient *m_teamFoundationClient;
     static TeamFoundationPlugin *m_teamFoundationPluginInstance;
 };

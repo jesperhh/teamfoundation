@@ -62,6 +62,8 @@ public:
     bool managesDirectory(const QString &directory) const;
     QString repositoryUrl(const QString &fileName) const;
     bool revertUnchanged(const QString &path);
+    bool shelve(const QString &path);
+    bool unshelve();
 
     /// Adds authentication information if it is specified
     static void addAuthentication(QStringList &arguments);
@@ -76,6 +78,7 @@ private slots:
     void getLatestCurrentFile();
     void forceGetLatestCurrentFile();
     void historyCurrentFile();
+    void shelveCurrentFile();
 
     // Project level command slots
     void historyProject();
@@ -85,6 +88,11 @@ private slots:
     void compareProject();
     void checkInProject();
     void revertUnchangedProject();
+    void shelveProject();
+
+    // Repository
+    void shelveRepository();
+    void unshelveRepository();
 
     // settings
     void configurationChanged();

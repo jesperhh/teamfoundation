@@ -27,6 +27,8 @@
 #include <utils/qtcassert.h>
 #include <QFileInfo>
 #include <QDir>
+#include <QDate>
+#include <QTime>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
 
@@ -339,6 +341,13 @@ void TeamFoundationClient::historyCurrentFile()
     history(filename);
 }
 
+void TeamFoundationClient::shelveCurrentFile()
+{
+    QTC_ASSERT(m_plugin->currentState().hasFile(), return);
+    const QString filename = m_plugin->currentState().currentFile();
+    shelve(filename);
+}
+
 void TeamFoundationClient::historyProject()
 {
     QTC_ASSERT(m_plugin->currentState().hasTopLevel(), return);
@@ -386,6 +395,23 @@ void TeamFoundationClient::revertUnchangedProject()
     QTC_ASSERT(m_plugin->currentState().hasTopLevel(), return);
     const QString topLevel = m_plugin->currentState().topLevel();
     revertUnchanged(topLevel);
+}
+
+void TeamFoundationClient::shelveProject()
+{
+    QTC_ASSERT(m_plugin->currentState().hasTopLevel(), return);
+    const QString topLevel = m_plugin->currentState().topLevel();
+    shelve(topLevel);
+}
+
+void TeamFoundationClient::shelveRepository()
+{
+    shelve(QString());
+}
+
+void TeamFoundationClient::unshelveRepository()
+{
+    unshelve();
 }
 
 TeamFoundationResponse TeamFoundationClient::runTf(const QString &workingDirectory,
@@ -483,4 +509,35 @@ bool TeamFoundationClient::revertUnchanged(const QString &path)
 
     const TeamFoundationResponse resp = runTfpt(QDir::current().path(), parameters, VcsBase::VcsCommand::ShowStdOut);
     return !resp.error() || (resp.exitCode != 100 /* exit code if there where no files to revert */);
+}
+
+bool TeamFoundationClient::shelve(const QString &path)
+{
+    QString shelveSetName;
+    shelveSetName += QDate::currentDate().toString(QLatin1String("yyyyMMdd_"));
+    shelveSetName += QTime::currentTime().toString(QLatin1String("HHmmss_"));
+    shelveSetName += QLatin1String("change_me");
+
+    QStringList parameters;
+    parameters << QLatin1String("shelve");
+    parameters << shelveSetName; // add dummy shelve-set name to not confuse tf.exe
+    if (!path.isEmpty()) {
+        parameters << QDir::toNativeSeparators(path);
+        addRecursive(parameters, path);
+    }
+
+    parameters << QLatin1String("/prompt");
+
+    const TeamFoundationResponse resp = runTf(QDir::current().path(), parameters);
+    return !resp.error();
+}
+
+bool TeamFoundationClient::unshelve()
+{
+    QStringList parameters;
+    parameters << QLatin1String("unshelve");
+    parameters << QLatin1String("/prompt");
+
+    const TeamFoundationResponse resp = runTf(QDir::current().path(), parameters);
+    return !resp.error();
 }
