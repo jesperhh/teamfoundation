@@ -359,8 +359,8 @@ TeamFoundationResponse TeamFoundationClient::runVcs(
                              flags);
 
     response.error = runVcsResponse.result != Utils::SynchronousProcessResponse::Finished;
-    response.standardError = runVcsResponse.stdErr;
-    response.standardOut = runVcsResponse.stdOut;
+    response.standardError = runVcsResponse.stdErr();
+    response.standardOut = runVcsResponse.stdOut();
     return response;
 }
 
