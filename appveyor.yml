@@ -1,5 +1,6 @@
 version: 4.2.{build}
 skip_tags: true
+skip_branch_with_pr: true
 image: Visual Studio 2015
 init:
 - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-http-proxy.ps1'))
@@ -24,7 +25,7 @@ build_script:
     mkdir %APPVEYOR_BUILD_FOLDER%\qt-libs
 
     %APPVEYOR_BUILD_FOLDER%\build\make_import_libs.bat %APPVEYOR_BUILD_FOLDER%\qt-bin\bin %APPVEYOR_BUILD_FOLDER%\qt-libs
-    
+
     %APPVEYOR_BUILD_FOLDER%\build\make_import_libs.bat %APPVEYOR_BUILD_FOLDER%\qt-bin\lib\qtcreator\plugins %APPVEYOR_BUILD_FOLDER%\qt-libs
 
     cd %APPVEYOR_BUILD_FOLDER%
@@ -42,3 +43,5 @@ deploy:
   auth_token:
     secure: a/eMX85I7Kw+Mk4vfjfg5pN+jMqjfq4hXr3/JxIDeqcp+s+3iWV+r/TwUVQRSxAj
   artifact: rel
+  on:
+    branch: master
