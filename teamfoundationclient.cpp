@@ -452,8 +452,8 @@ TeamFoundationResponse TeamFoundationClient::runVcs(
                              flags);
 
     response.exitCode = runVcsResponse.exitCode;
-    response.standardError = runVcsResponse.stdErr;
-    response.standardOut = runVcsResponse.stdOut;
+    response.standardError = runVcsResponse.stdErr();
+    response.standardOut = runVcsResponse.stdOut();
     return response;
 }
 

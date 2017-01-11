@@ -1,0 +1,47 @@
+version: 4.2.{build}
+skip_tags: true
+skip_branch_with_pr: true
+image: Visual Studio 2015
+init:
+- ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-http-proxy.ps1'))
+environment:
+  QTDIR: C:\Qt\5.7\msvc2015\
+  qt_dl_path: https://download.qt.io/official_releases/qtcreator/4.2/4.2.0/
+install:
+- cmd: >-
+    appveyor DownloadFile "%qt_dl_path%qt-creator-opensource-src-4.2.0.zip" -FileName %APPVEYOR_BUILD_FOLDER%\qt-src.zip -Timeout 1500000
+
+    7z x -y qt-src.zip -o"%APPVEYOR_BUILD_FOLDER%\qt-src\" | findstr /b /r /c:"\<Everything is Ok"
+
+    appveyor DownloadFile "%qt_dl_path%installer_source/windows_vs2015_32/qtcreator.7z" -FileName %APPVEYOR_BUILD_FOLDER%\qt-bin.7z -Timeout 1500000
+
+    7z x -y qt-bin.7z -o"%APPVEYOR_BUILD_FOLDER%\qt-bin\" | findstr /b /r /c:"\<Everything is Ok"
+build_script:
+- cmd: >-
+    %QTDIR%\bin\qtenv2.bat
+
+    "%ProgramFiles(x86)%\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x86
+
+    mkdir %APPVEYOR_BUILD_FOLDER%\qt-libs
+
+    %APPVEYOR_BUILD_FOLDER%\build\make_import_libs.bat %APPVEYOR_BUILD_FOLDER%\qt-bin\bin %APPVEYOR_BUILD_FOLDER%\qt-libs
+
+    %APPVEYOR_BUILD_FOLDER%\build\make_import_libs.bat %APPVEYOR_BUILD_FOLDER%\qt-bin\lib\qtcreator\plugins %APPVEYOR_BUILD_FOLDER%\qt-libs
+
+    cd %APPVEYOR_BUILD_FOLDER%
+
+    qmake teamfoundation.pro -r "CONFIG+=release" "QTC_SOURCE=%APPVEYOR_BUILD_FOLDER%\qt-src\qt-creator-opensource-src-4.2.0" "QTC_BUILD=%APPVEYOR_BUILD_FOLDER%\qt-bin\bin" "LIBS+=-L%APPVEYOR_BUILD_FOLDER%\qt-libs" "OUTPUT_PATH=%APPVEYOR_BUILD_FOLDER%\artifacts\4.2.0"
+
+    nmake.exe
+
+    7z a teamfoundation.zip %APPVEYOR_BUILD_FOLDER%\artifacts\4.2.0\TeamFoundation4.dll %APPVEYOR_BUILD_FOLDER%\wizard\*.*
+artifacts:
+- path: teamfoundation.zip
+  name: rel
+deploy:
+- provider: GitHub
+  auth_token:
+    secure: a/eMX85I7Kw+Mk4vfjfg5pN+jMqjfq4hXr3/JxIDeqcp+s+3iWV+r/TwUVQRSxAj
+  artifact: rel
+  on:
+    branch: master
