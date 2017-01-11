@@ -8,12 +8,12 @@ environment:
   qt_dl_path: https://download.qt.io/official_releases/qtcreator/4.2/4.2.0/
 install:
 - cmd: >-
-    @echo "Downloading %qt_dl_path%qt-creator-opensource-src-4.2.0.zip"
+    echo "Downloading %qt_dl_path%qt-creator-opensource-src-4.2.0.zip"
     appveyor DownloadFile "%qt_dl_path%qt-creator-opensource-src-4.2.0.zip" -FileName %APPVEYOR_BUILD_FOLDER%\qt-src.zip -Timeout 1500000
 
     7z x -y qt-src.zip -o"%APPVEYOR_BUILD_FOLDER%\qt-src\" | findstr /b /r /c:"\<Everything is Ok"
 
-    @echo "Downloading %qt_dl_path%installer_source/windows_vs2015_32/qtcreator.7z"
+    echo "Downloading %qt_dl_path%installer_source/windows_vs2015_32/qtcreator.7z"
     appveyor DownloadFile "%qt_dl_path%installer_source/windows_vs2015_32/qtcreator.7z" -FileName %APPVEYOR_BUILD_FOLDER%\qt-bin.7z -Timeout 1500000
 
     7z x -y qt-bin.7z -o"%APPVEYOR_BUILD_FOLDER%\qt-bin\" | findstr /b /r /c:"\<Everything is Ok"
