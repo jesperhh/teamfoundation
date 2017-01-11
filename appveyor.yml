@@ -9,9 +9,11 @@ environment:
 install:
 - cmd: >-
     appveyor DownloadFile "%qt_dl_path%qt-creator-opensource-src-4.2.0.zip" -FileName %APPVEYOR_BUILD_FOLDER%\qt-src.zip -Timeout 1500000
+
     7z x -y qt-src.zip -o"%APPVEYOR_BUILD_FOLDER%\qt-src\" | findstr /b /r /c:"\<Everything is Ok"
 
     appveyor DownloadFile "%qt_dl_path%installer_source/windows_vs2015_32/qtcreator.7z" -FileName %APPVEYOR_BUILD_FOLDER%\qt-bin.7z -Timeout 1500000
+
     7z x -y qt-bin.7z -o"%APPVEYOR_BUILD_FOLDER%\qt-bin\" | findstr /b /r /c:"\<Everything is Ok"
 build_script:
 - cmd: >-
@@ -22,6 +24,7 @@ build_script:
     mkdir %APPVEYOR_BUILD_FOLDER%\qt-libs
 
     %APPVEYOR_BUILD_FOLDER%\build\make_import_libs.bat %APPVEYOR_BUILD_FOLDER%\qt-bin\bin %APPVEYOR_BUILD_FOLDER%\qt-libs
+    
     %APPVEYOR_BUILD_FOLDER%\build\make_import_libs.bat %APPVEYOR_BUILD_FOLDER%\qt-bin\lib\qtcreator\plugins %APPVEYOR_BUILD_FOLDER%\qt-libs
 
     cd %APPVEYOR_BUILD_FOLDER%
