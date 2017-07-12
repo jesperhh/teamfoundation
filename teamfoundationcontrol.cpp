@@ -29,6 +29,7 @@
 #include <projectexplorer/projecttree.h>
 
 #include <QDir>
+#include <utils/hostosinfo.h>
 #include <utils/synchronousprocess.h>
 #include <utils/qtcassert.h>
 #include <utils/algorithm.h>
@@ -48,6 +49,12 @@ QString TeamFoundationControl::displayName() const
 Core::Id TeamFoundationControl::id() const
 {
     return Core::Id(TeamFoundation::Constants::VCS_ID_TEAMFOUNDATION);
+}
+
+bool TeamFoundationControl::isVcsFileOrDirectory(const Utils::FileName & fileName) const
+{
+    return fileName.toFileInfo().isDir()
+            && !fileName.fileName().compare("$tf", Utils::HostOsInfo::fileNameCaseSensitivity());
 }
 
 bool TeamFoundationControl::isConfigured() const
