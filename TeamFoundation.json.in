@@ -4,7 +4,7 @@
     \"CompatVersion\" : \"$$QTCREATOR_COMPAT_VERSION\",
     \"Platform\" : \"(Windows.*)\",
     \"Vendor\" : \"Jesper Hellesø Hansen\",
-    \"Copyright\" : \"(C) 2015 Jesper Hellesø Hansen\",
+    \"Copyright\" : \"(C) $$QTCREATOR_COPYRIGHT_YEAR Jesper Hellesø Hansen\",
     \"License\" : [ \"GNU Lesser General Public License 2.1\" ],
     \"Category\" : \"Version Control\",
     \"Description\" : \"Team Foundation Server plugin for Qt Creator\",
