@@ -36,7 +36,7 @@ TeamFoundationSettings::TeamFoundationSettings()
     setSettingsGroup(QLatin1String("TeamFoundation"));
     declareKey(binaryPathKey, QLatin1String("tf" QTC_HOST_EXE_SUFFIX));
     declareKey(powerToolsBinaryPathKey, QLatin1String("tfpt" QTC_HOST_EXE_SUFFIX));
-    declareKey(passwordKey, QLatin1String(""));
+    declareKey(passwordKey, QString());
     declareKey(revertUnchangedFilesBeforeCheckinKey, true);
 }
 

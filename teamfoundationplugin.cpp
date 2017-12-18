@@ -198,7 +198,7 @@ bool TeamFoundationPlugin::initialize(const QStringList &arguments, QString *err
 
     Core::Context context(TEAMFOUNDATION_CONTEXT);
 
-    initializeVcs(new TeamFoundationControl(this), context);
+    initializeVcs<TeamFoundationControl>(context, this);
 
     m_teamFoundationPluginInstance = this;
 
