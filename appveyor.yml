@@ -1,4 +1,4 @@
-version: 4.3.{build}
+version: 4.4.{build}
 skip_tags: true
 skip_branch_with_pr: true
 image: Visual Studio 2015
@@ -6,10 +6,10 @@ init:
 - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-http-proxy.ps1'))
 environment:
   QTDIR: C:\Qt\5.7\msvc2015\
-  qt_dl_path: https://download.qt.io/official_releases/qtcreator/4.3/4.3.0/
+  qt_dl_path: https://download.qt.io/official_releases/qtcreator/4.4/4.4.1/
 install:
 - cmd: >-
-    appveyor DownloadFile "%qt_dl_path%qt-creator-opensource-src-4.3.0.zip" -FileName %APPVEYOR_BUILD_FOLDER%\qt-src.zip -Timeout 1500000
+    appveyor DownloadFile "%qt_dl_path%qt-creator-opensource-src-4.4.1.zip" -FileName %APPVEYOR_BUILD_FOLDER%\qt-src.zip -Timeout 1500000
 
     7z x -y qt-src.zip -o"%APPVEYOR_BUILD_FOLDER%\qt-src\" | findstr /b /r /c:"\<Everything is Ok"
 
@@ -30,11 +30,11 @@ build_script:
 
     cd %APPVEYOR_BUILD_FOLDER%
 
-    qmake teamfoundation.pro -r "CONFIG+=release" "QTC_SOURCE=%APPVEYOR_BUILD_FOLDER%\qt-src\qt-creator-opensource-src-4.3.0" "QTC_BUILD=%APPVEYOR_BUILD_FOLDER%\qt-bin\bin" "LIBS+=-L%APPVEYOR_BUILD_FOLDER%\qt-libs" "OUTPUT_PATH=%APPVEYOR_BUILD_FOLDER%\artifacts\4.3.0"
+    qmake teamfoundation.pro -r "CONFIG+=release" "QTC_SOURCE=%APPVEYOR_BUILD_FOLDER%\qt-src\qt-creator-opensource-src-4.4.1" "QTC_BUILD=%APPVEYOR_BUILD_FOLDER%\qt-bin\bin" "LIBS+=-L%APPVEYOR_BUILD_FOLDER%\qt-libs" "OUTPUT_PATH=%APPVEYOR_BUILD_FOLDER%\artifacts\4.4.1"
 
     nmake.exe
 
-    7z a teamfoundation.zip %APPVEYOR_BUILD_FOLDER%\artifacts\4.3.0\TeamFoundation4.dll %APPVEYOR_BUILD_FOLDER%\wizard\*.*
+    7z a teamfoundation.zip %APPVEYOR_BUILD_FOLDER%\artifacts\4.4.1\TeamFoundation4.dll %APPVEYOR_BUILD_FOLDER%\wizard\*.*
 artifacts:
 - path: teamfoundation.zip
   name: rel
