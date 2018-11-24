@@ -42,7 +42,7 @@ using namespace TeamFoundation::Internal;
 
 const char TEAMFOUNDATION_CONTEXT[] = "Team Foundation Context";
 
-TeamFoundationPlugin *TeamFoundationPlugin::m_teamFoundationPluginInstance = 0;
+TeamFoundationPlugin *TeamFoundationPlugin::m_teamFoundationPluginInstance = nullptr;
 
 TeamFoundationPlugin::TeamFoundationPlugin()
 {
@@ -106,8 +106,7 @@ void TeamFoundationPlugin::createMenus(const Core::Context &context)
     Core::ActionContainer* container = Core::ActionManager::createMenu(Core::Id(Constants::MENU_ID));
 
     const QString prefix = QLatin1String("tfs");
-    Core::CommandLocator* locator = new Core::CommandLocator("Team Foundation", prefix, prefix);
-    addAutoReleasedObject(locator);
+    Core::CommandLocator* locator = new Core::CommandLocator("Team Foundation", prefix, prefix, this);
 
     Core::ActionContainer *currentFileMenu = Core::ActionManager::createMenu("TeamFoundation.CurrentFileMenu");
     currentFileMenu->menu()->setTitle(tr("Current &File"));
@@ -205,7 +204,7 @@ bool TeamFoundationPlugin::initialize(const QStringList &arguments, QString *err
     m_settings.readSettings(Core::ICore::settings());
 
     m_teamFoundationClient = new TeamFoundationClient(this);
-    addAutoReleasedObject(new SettingsPage);
+    new SettingsPage(this);
 
     createMenus(context);
 

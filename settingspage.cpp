@@ -58,8 +58,9 @@ void SettingsPageWidget::setSettings(const TeamFoundationSettings &s)
     m_ui.revertUnchangedFilesBeforeCheckin->setChecked(s.boolValue(TeamFoundationSettings::revertUnchangedFilesBeforeCheckinKey));
 }
 
-SettingsPage::SettingsPage() :
-    m_widget(0)
+SettingsPage::SettingsPage(QObject *parent)
+    : VcsBaseOptionsPage(parent)
+    , m_widget(0)
 {
     setId("T.TeamFoundation");
     setDisplayName(tr("TeamFoundation"));

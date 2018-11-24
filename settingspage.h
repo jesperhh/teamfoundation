@@ -38,7 +38,7 @@ class SettingsPageWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit SettingsPageWidget(QWidget *parent = 0);
+    explicit SettingsPageWidget(QWidget *parent = nullptr);
 
     TeamFoundationSettings settings() const;
     void setSettings(const TeamFoundationSettings &);
@@ -53,7 +53,7 @@ class SettingsPage : public VcsBase::VcsBaseOptionsPage
     Q_OBJECT
 
 public:
-    SettingsPage();
+    SettingsPage(QObject *parent);
 
     QWidget *widget();
     void apply();
