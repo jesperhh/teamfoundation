@@ -39,7 +39,7 @@ public:
     virtual Core::Id id() const override;
 
     virtual bool isVcsFileOrDirectory(const Utils::FileName & fileName) const override;
-    virtual bool managesDirectory(const QString &directory, QString *topLevel = 0) const override;
+    virtual bool managesDirectory(const QString &directory, QString *topLevel = nullptr) const override;
     virtual bool managesFile(const QString &workingDirectory, const QString &fileName) const override;
     virtual bool isConfigured() const  override;
     virtual bool supportsOperation(Operation operation) const  override;

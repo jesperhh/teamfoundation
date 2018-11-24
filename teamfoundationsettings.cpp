@@ -21,6 +21,7 @@
 
 #include "teamfoundationsettings.h"
 
+#include <utils/algorithm.h>
 #include <utils/environment.h>
 
 namespace TeamFoundation {
@@ -58,9 +59,11 @@ int TeamFoundationSettings::timeOut() const
 Utils::FileName TeamFoundationSettings::tftpBinaryPath() const
 {
     if (m_tfptBinaryPath.isEmpty()) {
+        const Utils::FileNameList searchPaths = Utils::transform(stringValue(pathKey).split(Utils::HostOsInfo::pathListSeparator()), 
+            [](const QString &s) { return Utils::FileName::fromString(s); });
+
         m_tfptBinaryPath = Utils::Environment::systemEnvironment().searchInPath(
-                    stringValue(powerToolsBinaryPathKey), stringValue(pathKey).split(
-                        Utils::HostOsInfo::pathListSeparator()));
+                    stringValue(powerToolsBinaryPathKey), searchPaths);
     }
     return m_tfptBinaryPath;
 }
