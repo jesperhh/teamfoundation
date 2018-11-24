@@ -60,7 +60,7 @@ void SettingsPageWidget::setSettings(const TeamFoundationSettings &s)
 
 SettingsPage::SettingsPage(QObject *parent)
     : VcsBaseOptionsPage(parent)
-    , m_widget(0)
+    , m_widget(nullptr)
 {
     setId("T.TeamFoundation");
     setDisplayName(tr("TeamFoundation"));
