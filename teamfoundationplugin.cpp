@@ -260,6 +260,11 @@ bool TeamFoundationPlugin::submitEditorAboutToClose()
     return true;
 }
 
+void TeamFoundationPlugin::commitFromEditor()
+{
+    // Qt Creator submit editor is not used.
+}
+
 void TeamFoundationPlugin::updateActions(VcsBase::VcsBasePlugin::ActionState as)
 {
     foreach (QAction *projectAction, m_projectActions)
