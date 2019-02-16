@@ -96,6 +96,7 @@ protected:
             const char *actionId);
     void updateActions(VcsBase::VcsBasePlugin::ActionState);
     bool submitEditorAboutToClose();
+    void commitFromEditor() override;
 
 private:
     TeamFoundationSettings m_settings;
